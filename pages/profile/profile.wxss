@@ -1,0 +1,202 @@
+/* pages/profile/profile.wxss */
+
+.container {
+  min-height: 100vh;
+  background: var(--td-bg-color-page, #F3F4F5);
+  padding: 0;
+}
+
+/* 头部区域 */
+.header-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60rpx 32rpx 40rpx;
+}
+
+.user-card, .login-card {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20rpx;
+  padding: 32rpx;
+  backdrop-filter: blur(10px);
+}
+
+.user-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 8rpx;
+}
+
+.user-status {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.logout-btn {
+  background: transparent;
+  color: var(--td-error-color, #E34D59);
+  border: 2rpx solid var(--td-error-color, #E34D59);
+  border-radius: 16rpx;
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+}
+
+.login-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  margin-right: 24rpx;
+}
+
+.login-info {
+  flex: 1;
+}
+
+.login-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 8rpx;
+}
+
+.login-subtitle {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.login-btn {
+  background: var(--td-brand-color, #0052D9);
+  color: white;
+  border: none;
+  border-radius: 16rpx;
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+}
+
+/* 统计数据 */
+.stats-section {
+  margin: 32rpx 24rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 24rpx;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--td-brand-color, #0052D9);
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+/* 功能菜单 */
+.menu-section, .settings-section {
+  margin: 0 24rpx 24rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  margin: 4rpx 0;
+  transition: background-color 0.2s ease;
+}
+
+.menu-item:active {
+  background-color: #F9FAFB;
+}
+
+.menu-item.danger .menu-text {
+  color: var(--td-error-color, #E34D59);
+}
+
+.menu-icon {
+  font-size: 32rpx;
+  margin-right: 20rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #374151;
+}
+
+.menu-arrow {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+/* 版本信息 */
+.version-section {
+  margin: 32rpx 24rpx;
+  text-align: center;
+  padding: 32rpx 0;
+}
+
+.version-text {
+  display: block;
+  font-size: 24rpx;
+  color: #9CA3AF;
+  margin-bottom: 8rpx;
+}
+
+.copyright-text {
+  font-size: 22rpx;
+  color: #D1D5DB;
+}

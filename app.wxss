@@ -1,0 +1,136 @@
+/**app.wxss**/
+/* 全局样式 - TDesign浅色主题 */
+
+page {
+  --td-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --td-brand-color: #0052D9;
+  --td-success-color: #00A870;
+  --td-warning-color: #ED7B2F;
+  --td-error-color: #E34D59;
+  --td-text-color-primary: #1F2937;
+  --td-text-color-secondary: #6B7280;
+  --td-text-color-placeholder: #9CA3AF;
+  --td-bg-color-page: #F3F4F5;
+  --td-bg-color-container: #FFFFFF;
+  --td-border-color: #E5E7EB;
+  --td-shadow-color: rgba(0, 0, 0, 0.08);
+
+  background-color: var(--td-bg-color-page);
+  color: var(--td-text-color-primary);
+  font-family: var(--td-font-family);
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* 通用容器 */
+.container {
+  padding: 32rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.page-container {
+  background-color: var(--td-bg-color-container);
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin: 24rpx;
+  box-shadow: 0 2rpx 8rpx var(--td-shadow-color);
+}
+
+/* 通用卡片样式 */
+.card {
+  background-color: var(--td-bg-color-container);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 8rpx var(--td-shadow-color);
+}
+
+/* 通用按钮样式 */
+.btn-primary {
+  background-color: var(--td-brand-color);
+  color: white;
+  border: none;
+  border-radius: 8rpx;
+  padding: 16rpx 32rpx;
+  font-size: 28rpx;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--td-brand-color);
+  border: 2rpx solid var(--td-brand-color);
+  border-radius: 8rpx;
+  padding: 14rpx 30rpx;
+  font-size: 28rpx;
+}
+
+/* 通用标题样式 */
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--td-text-color-primary);
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: var(--td-text-color-secondary);
+  margin-bottom: 32rpx;
+}
+
+/* 通用文本样式 */
+.text-primary {
+  color: var(--td-text-color-primary);
+}
+
+.text-secondary {
+  color: var(--td-text-color-secondary);
+}
+
+.text-success {
+  color: var(--td-success-color);
+}
+
+.text-warning {
+  color: var(--td-warning-color);
+}
+
+.text-error {
+  color: var(--td-error-color);
+}
+
+/* 布局工具类 */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-16 { margin-top: 16rpx; }
+.mt-24 { margin-top: 24rpx; }
+.mt-32 { margin-top: 32rpx; }
+.mb-16 { margin-bottom: 16rpx; }
+.mb-24 { margin-bottom: 24rpx; }
+.mb-32 { margin-bottom: 32rpx; }
+.ml-16 { margin-left: 16rpx; }
+.mr-16 { margin-right: 16rpx; }

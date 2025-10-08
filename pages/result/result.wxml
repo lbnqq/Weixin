@@ -1,0 +1,128 @@
+<!--pages/result/result.wxml-->
+<view class="container">
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading-section">
+    <view class="loading-icon">🤖</view>
+    <text class="loading-text">AI正在分析你的性格特征...</text>
+    <text class="loading-subtitle">这可能需要几秒钟时间</text>
+  </view>
+
+  <!-- 错误状态 -->
+  <view wx:if="{{error}}" class="error-section">
+    <view class="error-icon">❌</view>
+    <text class="error-text">{{error}}</text>
+    <button class="retry-btn" bindtap="calculateResult">重新计算</button>
+  </view>
+
+  <!-- 结果展示 -->
+  <view wx:if="{{!isLoading && !error}}" class="result-section">
+    <!-- 用户信息头部 -->
+    <view class="header-section">
+      <view wx:if="{{userInfo}}" class="user-info">
+        <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        <view class="user-details">
+          <text class="user-name">{{userInfo.nickName}}</text>
+          <text class="result-title">性格分析报告</text>
+        </view>
+      </view>
+      <view wx:else class="anonymous-info">
+        <view class="anonymous-avatar">👤</view>
+        <text class="result-title">性格分析报告</text>
+      </view>
+    </view>
+
+    <!-- 得分展示 -->
+    <view wx:if="{{scores}}" class="scores-section">
+      <view class="section-title">五维度得分</view>
+
+      <view class="scores-grid">
+        <view wx:for="{{['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']}}"
+              wx:key="*this" class="score-item">
+          <view class="score-header">
+            <text class="score-icon">
+              <text wx:if="{{item === 'openness'}}">🎨</text>
+              <text wx:if="{{item === 'conscientiousness'}}">📋</text>
+              <text wx:if="{{item === 'extraversion'}}">🌟</text>
+              <text wx:if="{{item === 'agreeableness'}}">🤝</text>
+              <text wx:if="{{item === 'neuroticism'}}">😰</text>
+            </text>
+            <text class="score-name">
+              <text wx:if="{{item === 'openness'}}">开放性</text>
+              <text wx:if="{{item === 'conscientiousness'}}">尽责性</text>
+              <text wx:if="{{item === 'extraversion'}}">外向性</text>
+              <text wx:if="{{item === 'agreeableness'}}">宜人性</text>
+              <text wx:if="{{item === 'neuroticism'}}">神经质</text>
+            </text>
+          </view>
+          <view class="score-value">{{scores[item].average}}</view>
+          <view class="score-bar">
+            <view class="score-fill" style="width: {{scores[item].average / 5 * 100}}%"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI分析结果 -->
+    <view wx:if="{{aiSummary}}" class="summary-section">
+      <view class="section-title">AI智能分析</view>
+
+      <view class="summary-content">
+        <view class="content-item personality-item">
+          <view class="content-header">
+            <text class="content-icon personality-icon">🧠</text>
+            <text class="content-title personality-title">性格分析</text>
+          </view>
+          <view class="content-text personality-text" style="padding: 24rpx; font-size: 28rpx; line-height: 1.8; color: #374151;">
+            <text>{{aiSummary.personality}}</text>
+          </view>
+        </view>
+
+        <view class="content-item career-item">
+          <view class="content-header">
+            <text class="content-icon career-icon">💼</text>
+            <text class="content-title career-title">职业建议</text>
+          </view>
+          <view class="content-text career-text" style="padding: 24rpx; font-size: 28rpx; line-height: 1.8; color: #374151;">
+            <text>{{aiSummary.career}}</text>
+          </view>
+        </view>
+
+        <view class="content-item relationship-item">
+          <view class="content-header">
+            <text class="content-icon relationship-icon">🤝</text>
+            <text class="content-title relationship-title">人际关系</text>
+          </view>
+          <view class="content-text relationship-text" style="padding: 24rpx; font-size: 28rpx; line-height: 1.8; color: #374151;">
+            <text>{{aiSummary.relationship}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="actions-section">
+      <button class="action-btn primary" bindtap="shareResult">
+        <text class="btn-icon">📤</text>
+        <text class="btn-text">分享结果</text>
+      </button>
+
+      <button class="action-btn secondary" bindtap="retakeTest">
+        <text class="btn-icon">🔄</text>
+        <text class="btn-text">重新测试</text>
+      </button>
+
+      <button class="action-btn secondary" bindtap="viewHistory">
+        <text class="btn-icon">📋</text>
+        <text class="btn-text">查看历史</text>
+      </button>
+    </view>
+
+    <!-- 底部提示 -->
+    <view class="footer-section">
+      <text class="footer-text">测试结果仅供参考，每个人的性格都是独特的</text>
+    </view>
+  </view>
+
+  <!-- 分享图片画布（隐藏） -->
+  <canvas canvas-id="shareCanvas" style="position: fixed; top: -9999px; left: -9999px; width: 750px; height: 1200px;"></canvas>
+</view>

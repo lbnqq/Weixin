@@ -1,0 +1,326 @@
+/* pages/index/index.wxss */
+
+.container {
+  padding: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* 头部样式 */
+.header {
+  padding: 60rpx 32rpx 40rpx;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.user-details {
+  flex: 1;
+}
+
+.nickname {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 8rpx;
+}
+
+.welcome {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.login-prompt {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.avatar-placeholder {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  background: #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #6B7280;
+}
+
+.login-text {
+  flex: 1;
+}
+
+.login-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 4rpx;
+}
+
+.login-subtitle {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.login-btn {
+  background: var(--td-brand-color, #0052D9);
+  color: white;
+  border: none;
+  border-radius: 24rpx;
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+  margin-left: 16rpx;
+}
+
+/* 测试卡片 */
+.test-section {
+  padding: 0 24rpx 32rpx;
+}
+
+.test-card {
+  background: white;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+.test-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 32rpx;
+}
+
+.test-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+  margin-top: 8rpx;
+}
+
+.test-info {
+  flex: 1;
+}
+
+.test-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 12rpx;
+}
+
+.test-description {
+  font-size: 28rpx;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+/* 进度显示 */
+.progress-section {
+  background: #F3F4F5;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 32rpx;
+  border-left: 6rpx solid var(--td-brand-color, #0052D9);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-text {
+  font-size: 28rpx;
+  color: #1F2937;
+  font-weight: 500;
+}
+
+.progress-date {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+/* 功能特点 */
+.test-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx;
+  background: #F9FAFB;
+  border-radius: 12rpx;
+}
+
+.feature-icon {
+  font-size: 24rpx;
+  margin-right: 12rpx;
+}
+
+.feature-text {
+  font-size: 26rpx;
+  color: #374151;
+}
+
+/* 测试按钮 */
+.test-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.start-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.4);
+}
+
+.restart-btn {
+  padding: 20rpx 32rpx;
+  background: transparent;
+  color: #6B7280;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+/* 最近记录 */
+.recent-section {
+  padding: 0 24rpx 32rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: white;
+}
+
+.section-subtitle {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.recent-item {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.recent-info {
+  flex: 1;
+}
+
+.recent-date {
+  font-size: 28rpx;
+  color: #1F2937;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.recent-summary {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+.recent-arrow {
+  font-size: 32rpx;
+  color: #9CA3AF;
+  margin-left: 16rpx;
+}
+
+/* 功能介绍 */
+.features-section {
+  padding: 0 24rpx 40rpx;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20rpx;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16rpx;
+  padding: 32rpx 20rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.feature-card-icon {
+  font-size: 40rpx;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.feature-card-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 8rpx;
+}
+
+.feature-card-desc {
+  font-size: 22rpx;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+/* 底部 */
+.footer {
+  padding: 24rpx;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+}

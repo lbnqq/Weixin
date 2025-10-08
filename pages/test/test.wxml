@@ -1,0 +1,73 @@
+<!--pages/test/test.wxml-->
+<view class="container">
+  <!-- 进度条 -->
+  <view class="progress-section">
+    <view class="progress-header">
+      <text class="progress-title">大五人格测试</text>
+      <text class="progress-text">{{currentQuestion}}/{{totalQuestions}}</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{currentQuestion / totalQuestions * 100}}%"></view>
+    </view>
+  </view>
+
+  <!-- 题目卡片 -->
+  <view wx:if="{{question}}" class="question-card">
+    <view class="question-header">
+      <text class="question-number">第 {{currentQuestion}} 题</text>
+      <text class="question-dimension">{{question.dimension}}</text>
+    </view>
+
+    <view class="question-content">
+      <text class="question-text">{{question.text}}</text>
+      <text class="question-text-en">{{question.textEn}}</text>
+    </view>
+
+    <view class="options-section">
+      <view class="options-title">请选择您的答案：</view>
+
+      <view class="options-list">
+        <view wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+              class="option-item {{selectedAnswer === item ? 'selected' : ''}}"
+              bindtap="selectAnswer" data-value="{{item}}">
+          <view class="option-radio">
+            <view class="radio-circle {{selectedAnswer === item ? 'checked' : ''}}"></view>
+          </view>
+          <view class="option-text">
+            <text wx:if="{{item === 1}}">完全不同意</text>
+            <text wx:if="{{item === 2}}">不同意</text>
+            <text wx:if="{{item === 3}}">中立</text>
+            <text wx:if="{{item === 4}}">同意</text>
+            <text wx:if="{{item === 5}}">完全同意</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="navigation-section">
+      <button wx:if="{{currentQuestion > 1}}"
+              class="nav-btn prev-btn"
+              bindtap="prevQuestion">上一题</button>
+
+      <button wx:if="{{currentQuestion < totalQuestions}}"
+              class="nav-btn next-btn {{selectedAnswer === null ? 'disabled' : ''}}"
+              bindtap="nextQuestion">下一题</button>
+
+      <button wx:if="{{currentQuestion === totalQuestions}}"
+              class="nav-btn submit-btn {{selectedAnswer === null ? 'disabled' : ''}}"
+              bindtap="submitTest">提交测试</button>
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="tips-section">
+    <view class="tip-item">
+      <text class="tip-icon">💡</text>
+      <text class="tip-text">请根据您的真实情况选择答案</text>
+    </view>
+    <view class="tip-item">
+      <text class="tip-icon">⏰</text>
+      <text class="tip-text">测试进度会自动保存</text>
+    </view>
+  </view>
+</view>
