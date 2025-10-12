@@ -10,7 +10,9 @@ Page({
     testProgress: null,
     recentTests: [],
     isLoading: false,
-    theme: app.globalData.theme || {}
+    theme: app.globalData.theme || {},
+    showLoginModal: false,
+    agreedToAgreement: false
   },
 
   onLoad: function (options) {
@@ -33,6 +35,7 @@ Page({
     // 每次显示页面时刷新数据
     this.checkLoginStatus()
     this.loadTestProgress()
+    this.loadRecentTests()
   },
 
   // 检查登录状态
@@ -67,10 +70,30 @@ Page({
   loadRecentTests: function () {
     if (!this.data.isLoggedIn) return
 
-    const tests = wx.getStorageSync('testResults') || []
-    this.setData({
-      recentTests: tests.slice(0, 3) // 只显示最近3条
-    })
+    try {
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo) {
+        this.setData({
+          recentTests: []
+        })
+        return
+      }
+
+      // 获取当前用户的测试历史
+      const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+      const tests = wx.getStorageSync(userHistoryKey) || []
+
+      console.log(`加载用户 ${userInfo.nickName} 的最近测试记录:`, tests.length, '条')
+
+      this.setData({
+        recentTests: tests.slice(0, 3) // 只显示最近3条
+      })
+    } catch (error) {
+      console.error('加载最近测试记录失败:', error)
+      this.setData({
+        recentTests: []
+      })
+    }
   },
 
   // 开始测试
@@ -163,9 +186,72 @@ Page({
     }
   },
 
+  // 登录相关方法
+  showLoginModal: function () {
+    this.setData({
+      showLoginModal: true,
+      agreedToAgreement: false
+    })
+  },
+
+  hideLoginModal: function () {
+    this.setData({
+      showLoginModal: false
+    })
+  },
+
+  toggleAgreement: function () {
+    this.setData({
+      agreedToAgreement: !this.data.agreedToAgreement
+    })
+  },
+
+  confirmLogin: function () {
+    if (!this.data.agreedToAgreement) {
+      wx.showToast({
+        title: '请先同意用户协议和隐私政策',
+        icon: 'none'
+      })
+      return
+    }
+    
+    this.hideLoginModal()
+    this.getUserProfile()
+  },
+
+  // 查看用户协议
+  viewAgreement: function () {
+    wx.navigateTo({
+      url: '/pages/agreement/agreement'
+    })
+  },
+
+  // 查看隐私政策
+  viewPrivacy: function () {
+    wx.navigateTo({
+      url: '/pages/privacy/privacy'
+    })
+  },
+
+  // 在弹窗中查看用户协议
+  viewAgreementInModal: function () {
+    this.hideLoginModal()
+    wx.navigateTo({
+      url: '/pages/agreement/agreement'
+    })
+  },
+
+  // 在弹窗中查看隐私政策
+  viewPrivacyInModal: function () {
+    this.hideLoginModal()
+    wx.navigateTo({
+      url: '/pages/privacy/privacy'
+    })
+  },
+
   // 登录功能
   handleLogin: function () {
-    this.getUserProfile()
+    this.showLoginModal()
   },
 
   // 获取用户信息
@@ -184,8 +270,13 @@ Page({
         app.globalData.userInfo = userInfo
         app.globalData.isLoggedIn = true
 
+        console.log(`用户 ${userInfo.nickName} 已登录`)
+
         // 这里可以添加登录后的逻辑，比如同步到Supabase
         this.syncUserToSupabase(userInfo)
+
+        // 登录后立即加载用户数据
+        this.loadRecentTests()
 
         wx.showToast({
           title: '登录成功',

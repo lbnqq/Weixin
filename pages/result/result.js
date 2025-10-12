@@ -4,8 +4,13 @@ Page({
     userInfo: null,
     scores: null,
     aiSummary: null,
+    mbtiResult: null,
+    belbinResult: null,
     isLoading: true,
-    error: null
+    error: null,
+    // UI状态
+    activeTab: 'personality', // personality, mbti, belbin, career
+    showAdvancedAnalysis: false
   },
 
   onLoad: function (options) {
@@ -39,34 +44,57 @@ Page({
       if (result) {
         console.log('从历史记录加载的结果:', result)
 
-        // 检查AI分析结果是否完整，如果不完整则使用默认分析
+        // 如果历史记录中没有MBTI和贝尔宾结果，重新计算
+        let mbtiResult = result.mbtiResult
+        let belbinResult = result.belbinResult
+
+        if (!mbtiResult) {
+          const { calculateMBTI } = require('../../utils/mbti-calculator')
+          mbtiResult = calculateMBTI(result.scores)
+        }
+
+        if (!belbinResult) {
+          const { calculateBelbinRoles } = require('../../utils/belbin-calculator')
+          belbinResult = calculateBelbinRoles(result.scores)
+        }
+
+        // 检查AI分析结果是否完整，如果不完整则生成完整的默认分析
         const aiSummary = result.aiSummary || {}
         const enhancedSummary = {
           success: aiSummary.success || false,
+          // 基础分析
           career: aiSummary.career || this.getDefaultCareerAnalysis(result.scores),
           personality: aiSummary.personality || this.getDefaultPersonalityAnalysis(result.scores),
-          relationship: aiSummary.relationship || this.getDefaultRelationshipAnalysis(result.scores)
+          relationship: aiSummary.relationship || this.getDefaultRelationshipAnalysis(result.scores),
+          // MBTI和贝尔宾分析 - 如果没有则生成基于计算结果的默认分析
+          mbtiAnalysis: aiSummary.mbtiAnalysis || this.generateMBTIAnalysis(mbtiResult),
+          belbinAnalysis: aiSummary.belbinAnalysis || this.generateBelbinAnalysis(belbinResult),
+          careerDevelopment: aiSummary.careerDevelopment || this.generateCareerDevelopment(result.scores, mbtiResult, belbinResult),
+          personalGrowth: aiSummary.personalGrowth || this.generatePersonalGrowth(result.scores, mbtiResult, belbinResult)
         }
 
         console.log('增强后的AI总结:', enhancedSummary)
 
         // 格式化内容
-        const formattedPersonality = this.formatContentText(enhancedSummary.personality)
-        const formattedCareer = this.formatContentText(enhancedSummary.career)
-        const formattedRelationship = this.formatContentText(enhancedSummary.relationship)
+        const formattedData = {
+          formattedPersonality: this.formatContentText(enhancedSummary.personality),
+          formattedCareer: this.formatContentText(enhancedSummary.career),
+          formattedRelationship: this.formatContentText(enhancedSummary.relationship),
+          formattedMBTIAnalysis: this.formatContentText(enhancedSummary.mbtiAnalysis),
+          formattedBelbinAnalysis: this.formatContentText(enhancedSummary.belbinAnalysis),
+          formattedCareerDevelopment: this.formatContentText(enhancedSummary.careerDevelopment),
+          formattedPersonalGrowth: this.formatContentText(enhancedSummary.personalGrowth)
+        }
 
-        console.log('格式化后的内容:', {
-          formattedPersonality,
-          formattedCareer,
-          formattedRelationship
-        })
+        console.log('格式化后的内容:', formattedData)
 
         this.setData({
           scores: result.scores,
           aiSummary: enhancedSummary,
-          formattedPersonality: formattedPersonality,
-          formattedCareer: formattedCareer,
-          formattedRelationship: formattedRelationship,
+          mbtiResult: mbtiResult,
+          belbinResult: belbinResult,
+          ...formattedData,
+          showAdvancedAnalysis: true,
           isLoading: false
         })
       } else {
@@ -130,54 +158,84 @@ Page({
       const { aiAPI } = require('../../utils/ai-api')
       const summary = await aiAPI.getPersonalitySummary(scores, answers)
 
-      // 确保所有三个部分都有内容
+      // 确保所有部分都有内容
       const enhancedSummary = {
         ...summary,
+        // 基础分析
         career: summary.career || this.getDefaultCareerAnalysis(scores),
         personality: summary.personality || this.getDefaultPersonalityAnalysis(scores),
-        relationship: summary.relationship || this.getDefaultRelationshipAnalysis(scores)
+        relationship: summary.relationship || this.getDefaultRelationshipAnalysis(scores),
+        // MBTI和贝尔宾分析
+        mbtiAnalysis: summary.mbtiAnalysis || '暂无MBTI分析',
+        belbinAnalysis: summary.belbinAnalysis || '暂无贝尔宾分析',
+        careerDevelopment: summary.careerDevelopment || '暂无职业发展建议',
+        personalGrowth: summary.personalGrowth || '暂无个人成长建议'
       }
 
       // 调试信息
       console.log('AI总结数据:', enhancedSummary)
 
       // 格式化内容
-      const formattedPersonality = this.formatContentText(enhancedSummary.personality)
-      const formattedCareer = this.formatContentText(enhancedSummary.career)
-      const formattedRelationship = this.formatContentText(enhancedSummary.relationship)
+      const formattedData = {
+        formattedPersonality: this.formatContentText(enhancedSummary.personality),
+        formattedCareer: this.formatContentText(enhancedSummary.career),
+        formattedRelationship: this.formatContentText(enhancedSummary.relationship),
+        formattedMBTIAnalysis: this.formatContentText(enhancedSummary.mbtiAnalysis),
+        formattedBelbinAnalysis: this.formatContentText(enhancedSummary.belbinAnalysis),
+        formattedCareerDevelopment: this.formatContentText(enhancedSummary.careerDevelopment),
+        formattedPersonalGrowth: this.formatContentText(enhancedSummary.personalGrowth)
+      }
 
-      console.log('格式化后的性格分析:', formattedPersonality)
-      console.log('格式化后的职业建议:', formattedCareer)
-      console.log('格式化后的人际关系:', formattedRelationship)
+      console.log('格式化后的分析内容:', formattedData)
 
       this.setData({
         aiSummary: enhancedSummary,
-        formattedPersonality: formattedPersonality,
-        formattedCareer: formattedCareer,
-        formattedRelationship: formattedRelationship,
+        mbtiResult: summary.mbtiResult,
+        belbinResult: summary.belbinResult,
+        ...formattedData,
+        showAdvancedAnalysis: true,
         isLoading: false
       })
 
     } catch (error) {
       console.error('生成AI总结失败:', error)
-      // AI总结失败时使用默认分析
+
+      // 即使AI分析失败，也要计算MBTI和贝尔宾
+      const { calculateMBTI } = require('../../utils/mbti-calculator')
+      const { calculateBelbinRoles } = require('../../utils/belbin-calculator')
+
+      const mbtiResult = calculateMBTI(scores)
+      const belbinResult = calculateBelbinRoles(scores)
+
+      // 使用默认分析
       const defaultSummary = {
         success: false,
         career: this.getDefaultCareerAnalysis(scores),
         personality: this.getDefaultPersonalityAnalysis(scores),
-        relationship: this.getDefaultRelationshipAnalysis(scores)
+        relationship: this.getDefaultRelationshipAnalysis(scores),
+        mbtiAnalysis: `基于你的MBTI类型${mbtiResult.type}，你具有独特的性格特质组合。`,
+        belbinAnalysis: `作为${belbinResult.primaryRole.name || '团队成员'}，你在团队中扮演着重要的角色。`,
+        careerDevelopment: '结合你的性格特点，建议寻找能够发挥你优势的工作环境。',
+        personalGrowth: '通过了解自己的性格特质，你可以有针对性地制定个人成长计划。'
       }
 
       // 格式化默认内容
       const formattedData = {
         formattedPersonality: this.formatContentText(defaultSummary.personality),
         formattedCareer: this.formatContentText(defaultSummary.career),
-        formattedRelationship: this.formatContentText(defaultSummary.relationship)
+        formattedRelationship: this.formatContentText(defaultSummary.relationship),
+        formattedMBTIAnalysis: this.formatContentText(defaultSummary.mbtiAnalysis),
+        formattedBelbinAnalysis: this.formatContentText(defaultSummary.belbinAnalysis),
+        formattedCareerDevelopment: this.formatContentText(defaultSummary.careerDevelopment),
+        formattedPersonalGrowth: this.formatContentText(defaultSummary.personalGrowth)
       }
 
       this.setData({
         aiSummary: defaultSummary,
+        mbtiResult: mbtiResult,
+        belbinResult: belbinResult,
         ...formattedData,
+        showAdvancedAnalysis: true,
         isLoading: false
       })
     }
@@ -355,6 +413,8 @@ ${relationships[highestTrait.dimension]}
       const result = {
         scores: scores,
         aiSummary: aiSummary,
+        mbtiResult: this.data.mbtiResult,
+        belbinResult: this.data.belbinResult,
         testDate: new Date().toLocaleDateString(),
         timestamp: Date.now(),
         ...generateResultSummary(scores)
@@ -368,6 +428,53 @@ ${relationships[highestTrait.dimension]}
 
     } catch (error) {
       console.error('保存测试结果失败:', error)
+    }
+  },
+
+  // 切换分析标签页
+  switchTab: function(e) {
+    const tab = e.currentTarget.dataset.tab
+    this.setData({
+      activeTab: tab
+    })
+  },
+
+  // 展开/收起高级分析
+  toggleAdvancedAnalysis: function() {
+    this.setData({
+      showAdvancedAnalysis: !this.data.showAdvancedAnalysis
+    })
+  },
+
+  // 复制MBTI类型
+  copyMBTIType: function() {
+    if (this.data.mbtiResult) {
+      const text = `我的MBTI类型是：${this.data.mbtiResult.type}（${this.data.mbtiResult.profile.name}）`
+      wx.setClipboardData({
+        data: text,
+        success: () => {
+          wx.showToast({
+            title: '已复制到剪贴板',
+            icon: 'success'
+          })
+        }
+      })
+    }
+  },
+
+  // 复制贝尔宾角色
+  copyBelbinRole: function() {
+    if (this.data.belbinResult && this.data.belbinResult.primaryRole) {
+      const text = `我的贝尔宾团队角色是：${this.data.belbinResult.primaryRole.name}`
+      wx.setClipboardData({
+        data: text,
+        success: () => {
+          wx.showToast({
+            title: '已复制到剪贴板',
+            icon: 'success'
+          })
+        }
+      })
     }
   },
 
@@ -412,19 +519,8 @@ ${relationships[highestTrait.dimension]}
 
   // 分享结果
   shareResult: function () {
-    // 这里可以添加生成分享海报的逻辑
-    wx.showActionSheet({
-      itemList: ['分享给朋友', '保存到相册'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          // 分享给朋友
-          this.onShareAppMessage()
-        } else if (res.tapIndex === 1) {
-          // 保存到相册
-          this.saveToAlbum()
-        }
-      }
-    })
+    // 直接保存到相册，不再显示选项菜单
+    this.saveToAlbum()
   },
 
   // 保存到相册
@@ -611,7 +707,7 @@ ${relationships[highestTrait.dimension]}
 
     traits.forEach((trait, index) => {
       const y = startY + index * 80
-      const score = this.data.scores[trait.key]?.average || 0
+      const score = this.data.scores[trait.key].average || 0
 
       // 特质名称
       ctx.fillStyle = '#333333'
@@ -653,7 +749,7 @@ ${relationships[highestTrait.dimension]}
 
     traits.forEach((trait, index) => {
       const y = startY + index * 80
-      const score = this.data.scores[trait.key]?.average || 0
+      const score = this.data.scores[trait.key].average || 0
 
       // 特质名称 - 使用相对坐标
       ctx.setFillStyle('#333333')
@@ -927,6 +1023,123 @@ ${relationships[highestTrait.dimension]}
         })
       }
     })
+  },
+
+  // 生成MBTI深度分析
+  generateMBTIAnalysis: function(mbtiResult) {
+    if (!mbtiResult || !mbtiResult.type) {
+      return '无法生成MBTI分析，请检查测试数据。'
+    }
+
+    const { aiAPI } = require('../../utils/ai-api')
+    return aiAPI.generatePersonalizedMBTIAnalysis(mbtiResult.type, mbtiResult.profile.name)
+  },
+
+  // 生成贝尔宾团队角色分析
+  generateBelbinAnalysis: function(belbinResult) {
+    if (!belbinResult || !belbinResult.primaryRole) {
+      return '无法生成贝尔宾团队角色分析，请检查测试数据。'
+    }
+
+    const role = belbinResult.primaryRole
+    const roleDescriptions = {
+      '协调者': '作为团队的协调者，你擅长整合团队资源，促进团队成员之间的沟通与合作。你具有出色的组织能力和领导才能，能够在团队中发挥重要作用。',
+      '鞭策者': '作为团队的鞭策者，你具有强烈的目标导向和推动力，能够激励团队成员朝着共同目标努力。你擅长克服困难，在压力下保持冷静。',
+      '塑造者': '作为团队的塑造者，你具有创新思维和变革精神，能够为团队带来新的想法和解决方案。你善于挑战现状，推动团队不断进步。',
+      '监听评价者': '作为团队的监听评价者，你具有客观分析能力，能够理性评估各种方案的优缺点。你为团队提供重要的决策参考。',
+      '团队工作者': '作为团队工作者，你善于促进团队和谐，支持团队成员，为团队营造良好的工作氛围。你是团队中重要的粘合剂。',
+      '执行者': '作为执行者，你具有高效的执行力和可靠性，能够将想法转化为实际行动。你为团队提供稳定的支持。',
+      '完成者': '作为完成者，你注重细节，追求完美，能够确保工作按时高质量完成。你是团队质量的重要保障。',
+      '专家': '作为专家，你在特定领域具有专业知识和技能，能够为团队提供专业的建议和支持。',
+      '资源调查者': '作为资源调查者，你善于发现和获取外部资源，为团队创造新的机会和可能性。',
+      '创新者': '作为创新者，你具有丰富的想象力和创造力，能够为团队带来创新的解决方案。'
+    }
+
+    const baseAnalysis = roleDescriptions[role.name] || `作为${role.name}，你在团队中扮演着重要角色，为团队贡献自己的独特价值。`
+
+    return `${baseAnalysis}
+
+你的团队角色适配度为${role.fitScore}%，说明你在这个角色上有很好的表现。建议继续发挥你的优势，同时在其他方面也要适当发展，形成更全面的团队能力。`
+  },
+
+  // 生成职业发展建议
+  generateCareerDevelopment: function(scores, mbtiResult, belbinResult) {
+    const highestTrait = this.getHighestTrait(scores)
+    const careerText = this.getDefaultCareerAnalysis(scores)
+
+    let mbtiAdvice = ''
+    if (mbtiResult && mbtiResult.type) {
+      const mbtiCareers = {
+        'INTJ': '战略规划、科学研究、技术开发、管理咨询',
+        'INTP': '科学研究、技术开发、学术研究、分析工作',
+        'ENTJ': '高层管理、创业、咨询、战略规划',
+        'ENTP': '市场营销、创业、咨询、创意工作',
+        'INFJ': '心理咨询、教育、人力资源、社会工作',
+        'INFP': '艺术创作、写作、心理咨询、教育',
+        'ENFJ': '人力资源、教育、咨询、管理',
+        'ENFP': '市场营销、公关、创意工作、教育',
+        'ISTJ': '会计、行政管理、技术工作、质量管理',
+        'ISFJ': '护理、教育、行政、客户服务',
+        'ESTJ': '管理、行政、执法、金融服务',
+        'ESFJ': '教育、医疗、客户服务、人力资源',
+        'ISTP': '技术工作、手工艺、紧急服务、运动',
+        'ISFP': '艺术创作、设计、手工艺、护理',
+        'ESTP': '销售、市场营销、运动、娱乐',
+        'ESFP': '娱乐、旅游、销售、服务行业'
+      }
+
+      mbtiAdvice = `
+
+结合你的MBTI类型${mbtiResult.type}，特别适合的职业方向包括：
+${mbtiCareers[mbtiResult.type] || '根据你的MBTI类型，寻找能够发挥你独特优势的工作环境'}`
+    }
+
+    let belbinAdvice = ''
+    if (belbinResult && belbinResult.primaryRole) {
+      belbinAdvice = `
+
+作为${belbinResult.primaryRole.name}，在团队中你可以发挥重要作用，建议寻找能够充分发挥你团队角色的职业环境。`
+    }
+
+    return `${careerText}${mbtiAdvice}${belbinAdvice}
+
+职业发展是一个持续的过程，建议定期评估自己的职业目标和发展方向，不断调整和完善自己的职业规划。`
+  },
+
+  // 生成个人成长策略
+  generatePersonalGrowth: function(scores, mbtiResult, belbinResult) {
+    const highestTrait = this.getHighestTrait(scores)
+    const lowestTrait = this.getLowestTrait(scores)
+
+    let growthStrategy = `基于你的性格分析，制定以下个人成长策略：
+
+1. **发挥优势**：你的${highestTrait.name}特质最为突出，建议在这方面继续深入发展，形成核心竞争力。
+
+2. **补足短板**：在${lowestTrait.name}方面还有提升空间，建议通过相关活动和训练来加强。
+
+3. **平衡发展**：保持性格特质的平衡，避免过度依赖单一特质。`
+
+    if (mbtiResult && mbtiResult.type) {
+      growthStrategy += `
+
+4. **MBTI发展建议**：
+   - 发挥你作为${mbtiResult.type}类型的天生优势
+   - 针对你的性格特点制定相应的成长计划
+   - 在适合的环境中充分展现你的才华`
+    }
+
+    if (belbinResult && belbinResult.primaryRole) {
+      growthStrategy += `
+
+5. **团队角色发展**：
+   - 作为${belbinResult.primaryRole.name}，继续提升相关技能
+   - 了解其他团队角色的特点，提高团队协作能力
+   - 在团队中找到最适合你的位置`
+    }
+
+    return `${growthStrategy}
+
+个人成长是一个持续的过程，建议保持学习和自我反思的习惯，定期评估自己的成长进度，调整发展策略。记住，每个人都有独特的成长路径，关键是找到适合自己的方式。`
   },
 
   // 分享功能

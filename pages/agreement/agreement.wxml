@@ -1,0 +1,99 @@
+<!--pages/agreement/agreement.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="nav-bar">
+      <view class="nav-left" bindtap="navigateBack">
+        <text class="back-icon">‹</text>
+        <text class="back-text">返回</text>
+      </view>
+      <view class="nav-title">用户协议</view>
+      <view class="nav-right"></view>
+    </view>
+  </view>
+
+  <view class="content">
+    <view class="agreement-section">
+      <view class="section-title">大五人格测试用户协议</view>
+      <view class="update-time">更新时间：2025年10月12日</view>
+    </view>
+
+    <view class="agreement-content">
+      <view class="content-block">
+        <view class="block-title">1. 协议的接受</view>
+        <view class="block-text">
+          欢迎使用大五人格测试小程序（以下简称"本小程序"）。本协议是您与本小程序之间关于使用本小程序的法律协议。请您仔细阅读本协议，您点击"同意"按钮后，本协议即构成对双方有约束力的法律文件。
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">2. 服务内容</view>
+        <view class="block-text">
+          本小程序提供基于大五人格模型的心理测试服务，包括性格测试、结果分析、历史记录等功能。我们致力于提供准确、专业的测试服务，但测试结果仅供参考，不构成专业心理诊断。
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">3. 用户信息收集与使用</view>
+        <view class="block-text">
+          <view class="text-item">3.1 我们收集的信息包括：</view>
+          <view class="text-indent">• 微信头像、昵称等基本信息</view>
+          <view class="text-indent">• 测试答案和结果数据</view>
+          <view class="text-indent">• 设备信息和操作日志</view>
+          
+          <view class="text-item">3.2 信息使用目的：</view>
+          <view class="text-indent">• 提供个性化测试服务</view>
+          <view class="text-indent">• 保存测试历史记录</view>
+          <view class="text-indent">• 改进产品体验</view>
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">4. 用户隐私保护</view>
+        <view class="block-text">
+          我们重视您的隐私保护。您的个人信息将被严格保密，未经您的同意，我们不会向任何第三方透露您的个人信息，法律法规另有规定的除外。
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">5. 知识产权</view>
+        <view class="block-text">
+          本小程序的内容，包括但不限于文字、图片、音频、视频、软件、程序、版面设计等均受法律保护，未经本小程序书面许可，任何人不得擅自使用。
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">6. 免责声明</view>
+        <view class="block-text">
+          <view class="text-item">6.1 测试结果仅供参考：</view>
+          <view class="text-indent">• 本测试结果不构成专业心理诊断</view>
+          <view class="text-indent">• 请理性看待测试结果</view>
+          <view class="text-indent">• 如需专业帮助，请咨询心理医生</view>
+          
+          <view class="text-item">6.2 服务中断：</view>
+          <view class="text-indent">• 因不可抗力导致的服务中断</view>
+          <view class="text-indent">• 因网络问题导致的使用障碍</view>
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">7. 协议修改</view>
+        <view class="block-text">
+          本小程序有权根据需要修改本协议条款。如果您继续使用本小程序，则视为您接受修改后的协议。我们将通过适当方式通知您协议的修改。
+        </view>
+      </view>
+
+      <view class="content-block">
+        <view class="block-title">8. 联系我们</view>
+        <view class="block-text">
+          如您对本协议有任何疑问，请通过以下方式联系我们：
+          <view class="text-indent">• 小程序内反馈功能</view>
+          <view class="text-indent">• 邮箱：support@example.com</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="agreement-footer">
+      <view class="footer-text">本协议自发布之日起生效</view>
+    </view>
+  </view>
+</view>

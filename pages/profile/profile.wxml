@@ -2,13 +2,21 @@
 <view class="container">
   <!-- 用户信息头部 -->
   <view class="header-section">
-    <view wx:if="{{isLoggedIn}}" class="user-card">
-      <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
-      <view class="user-info">
-        <text class="user-name">{{userInfo.nickName}}</text>
-        <text class="user-status">已登录</text>
+    <view wx:if="{{isLoggedIn}}">
+      <view class="user-card" bindtap="editProfile">
+        <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        <view class="user-info">
+          <text class="user-name">{{userInfo.nickName}}</text>
+          <text class="user-status">已登录</text>
+        </view>
+        <view class="edit-btn">
+          <text class="edit-icon">✏️</text>
+          <text class="edit-text">编辑</text>
+        </view>
       </view>
-      <button class="logout-btn" bindtap="handleLogout">退出</button>
+      <view class="logout-section">
+        <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+      </view>
     </view>
 
     <view wx:else class="login-card">
@@ -45,6 +53,12 @@
     <view class="section-title">功能菜单</view>
 
     <view class="menu-list">
+      <view wx:if="{{isLoggedIn}}" class="menu-item" bindtap="editProfile">
+        <view class="menu-icon">👤</view>
+        <text class="menu-text">编辑资料</text>
+        <text class="menu-arrow">></text>
+      </view>
+
       <view class="menu-item" bindtap="startTest">
         <view class="menu-icon">🧠</view>
         <text class="menu-text">开始测试</text>

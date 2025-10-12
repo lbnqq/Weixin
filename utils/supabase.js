@@ -2,15 +2,23 @@
 // Supabase数据库集成工具类
 
 const app = getApp()
+const config = require('./config.js')
 
 class SupabaseClient {
   constructor() {
-    this.url = app.globalData.supabaseUrl
-    this.key = app.globalData.supabaseKey
+    // 直接从配置文件中获取，避免app.js未加载完成的问题
+    this.url = config.config.supabaseUrl
+    this.key = config.config.supabaseKey
+    
+    if (!this.url || !this.key) {
+      throw new Error('Supabase配置缺失，请检查config.js文件')
+    }
+    
     this.headers = {
       'apikey': this.key,
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.key}`
+      'Authorization': `Bearer ${this.key}`,
+      'Prefer': 'return=representation'
     }
   }
 
@@ -37,8 +45,12 @@ class SupabaseClient {
   }
 
   // 查询数据
-  async from(table) {
-    return new SupabaseQuery(this, table)
+  from(table) {
+    console.log('SupabaseClient.from called with table:', table)
+    const query = new SupabaseQuery(this, table)
+    console.log('SupabaseQuery instance created:', query)
+    console.log('SupabaseQuery.select type:', typeof query.select)
+    return query
   }
 
   // 插入数据
@@ -80,6 +92,7 @@ class SupabaseClient {
 
 class SupabaseQuery {
   constructor(client, table) {
+    console.log('SupabaseQuery constructor called with client:', client, 'table:', table)
     this.client = client
     this.table = table
     this.query = {
@@ -88,17 +101,36 @@ class SupabaseQuery {
       orderBy: null,
       limit: null
     }
+    console.log('SupabaseQuery constructor completed, this:', this)
+    
+    // 确保方法正确绑定
+    this.select = this.select.bind(this)
+    this.limit = this.limit.bind(this)
+    this.execute = this.execute.bind(this)
+    this.then = this.then.bind(this)
+    
+    console.log('SupabaseQuery.select method type:', typeof this.select)
+    console.log('SupabaseQuery.limit method type:', typeof this.limit)
   }
 
   // 选择字段
   select(columns = '*') {
+    console.log('SupabaseQuery.select called with columns:', columns)
     this.query.select = columns
+    console.log('SupabaseQuery instance after select:', this)
     return this
   }
 
   // 过滤条件
   eq(column, value) {
     const filter = `${column}=eq.${value}`
+    this.query.filter = this.query.filter ? `${this.query.filter}&${filter}` : filter
+    return this
+  }
+
+  // 模糊查询
+  like(column, pattern) {
+    const filter = `${column}=like.${pattern}`
     this.query.filter = this.query.filter ? `${this.query.filter}&${filter}` : filter
     return this
   }
@@ -111,7 +143,9 @@ class SupabaseQuery {
 
   // 限制数量
   limit(count) {
+    console.log('SupabaseQuery.limit called with count:', count)
     this.query.limit = count
+    console.log('SupabaseQuery instance after limit:', this)
     return this
   }
 
@@ -149,7 +183,11 @@ class SupabaseQuery {
 // 创建全局实例
 const supabase = new SupabaseClient()
 
+console.log('Supabase module loaded, supabase instance:', supabase)
+console.log('Supabase instance.from method type:', typeof supabase.from)
+
 module.exports = {
   supabase,
-  SupabaseClient
+  SupabaseClient,
+  SupabaseQuery
 }

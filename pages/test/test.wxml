@@ -1,5 +1,12 @@
 <!--pages/test/test.wxml-->
 <view class="container">
+  <!-- 调试信息（开发时显示） -->
+  <view style="background: #f0f0f0; padding: 10rpx; margin: 10rpx; border-radius: 8rpx; font-size: 24rpx;">
+    <text>调试信息：当前题目ID: {{currentQuestion}}, 题目对象: {{question ? '已加载' : '未加载'}}</text>
+    <text wx:if="{{debugInfo}}">调试详情: {{debugInfo}}</text>
+    <button style="margin: 10rpx; padding: 10rpx; background: #e6f7ff; border: 1px solid #91d5ff;" bindtap="testDataLoading">测试数据加载</button>
+  </view>
+
   <!-- 进度条 -->
   <view class="progress-section">
     <view class="progress-header">
@@ -57,6 +64,11 @@
               class="nav-btn submit-btn {{selectedAnswer === null ? 'disabled' : ''}}"
               bindtap="submitTest">提交测试</button>
     </view>
+  </view>
+
+  <!-- 题目未加载时的提示 -->
+  <view wx:else class="loading-section">
+    <text class="loading-text">正在加载题目...</text>
   </view>
 
   <!-- 提示信息 -->

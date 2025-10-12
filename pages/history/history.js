@@ -18,7 +18,23 @@ Page({
   // 加载测试历史
   loadTestHistory: function () {
     try {
-      const history = wx.getStorageSync('testResults') || []
+      // 检查用户登录状态
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo) {
+        console.log('用户未登录，清空历史记录显示')
+        this.setData({
+          testHistory: [],
+          isEmpty: true,
+          isLoading: false
+        })
+        return
+      }
+
+      // 获取当前用户的测试历史
+      const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+      const history = wx.getStorageSync(userHistoryKey) || []
+
+      console.log(`加载用户 ${userInfo.nickName} 的历史记录:`, history.length, '条')
 
       this.setData({
         testHistory: history,
@@ -69,11 +85,21 @@ Page({
   // 删除历史记录
   deleteHistoryRecord: function (index) {
     try {
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo) {
+        wx.showToast({
+          title: '用户未登录',
+          icon: 'none'
+        })
+        return
+      }
+
       const history = [...this.data.testHistory]
       history.splice(index, 1)
 
-      // 更新本地存储
-      wx.setStorageSync('testResults', history)
+      // 更新当前用户的本地存储
+      const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+      wx.setStorageSync(userHistoryKey, history)
 
       // 更新页面状态
       this.setData({
@@ -106,7 +132,19 @@ Page({
       success: (res) => {
         if (res.confirm) {
           try {
-            wx.removeStorageSync('testResults')
+            const userInfo = wx.getStorageSync('userInfo')
+            if (!userInfo) {
+              wx.showToast({
+                title: '用户未登录',
+                icon: 'none'
+              })
+              return
+            }
+
+            // 清空当前用户的历史记录
+            const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+            wx.removeStorageSync(userHistoryKey)
+
             this.setData({
               testHistory: [],
               isEmpty: true

@@ -260,6 +260,8 @@ ${relationshipAdvice[highestTrait]}
       return `职业建议：${careerAnalysis}`
     } else if (prompt.includes('人际关系')) {
       return `人际关系：${relationshipAnalysis}`
+    } else if (prompt.includes('MBTI') || prompt.includes('贝尔宾')) {
+      return this.generateAdvancedMockResponse(prompt)
     } else {
       return `基于你的测试结果：
 
@@ -269,6 +271,114 @@ ${relationshipAdvice[highestTrait]}
 
 人际关系：${relationshipAnalysis}`
     }
+  }
+
+  // 生成个性化的MBTI分析
+  generatePersonalizedMBTIAnalysis(mbtiType, mbtiName) {
+    const mbtiProfiles = {
+      'INTJ': {
+        analysis: '作为建筑师（INTJ），你具有独特的战略思维和创新能力。你善于看到整体格局和发展趋势，能够制定长远而复杂的计划。在决策时，你主要依靠逻辑分析和客观评估，不容易被情感因素影响。你更喜欢独立工作，需要充足的独处时间来思考和规划。你的优势在于系统性思考和创新思维，但可能需要更多地关注他人的情感需求和团队协作。'
+      },
+      'INTP': {
+        analysis: '作为逻辑学家（INTP），你具有卓越的理论思维和逻辑分析能力。你对抽象概念和复杂系统充满好奇，喜欢深入思考问题的本质。你思维灵活，能够从多个角度看待问题，不拘泥于传统观念。在社交中，你可能比较内向，更喜欢与志同道合的人进行深度交流。你的优势在于创新思维和问题解决能力，但需要提高实践执行和时间管理能力。'
+      },
+      'ENTJ': {
+        analysis: '作为指挥官（ENTJ），你天生具有领导才能和组织能力。你善于制定目标和计划，能够有效地组织和激励团队。在决策时果断而自信，能够承担风险和责任。你的外向特质让你善于沟通和协调，在团队中自然扮演领导角色。你的优势在于战略思维和执行力，但需要学会更多地倾听他人意见，关注团队成员的情感需求。'
+      },
+      'ENTP': {
+        analysis: '作为辩论家（ENTP），你充满创新精神和挑战欲望。你思维活跃，善于发现问题和提出新想法，喜欢从不同角度探讨可能性。你的外向特质让你善于表达和交流，能够在社交中展现个人魅力。你适应能力强，喜欢新挑战和变化的环境。你的优势在于创新思维和说服能力，但需要提高专注力和持续执行能力。'
+      },
+      'INFJ': {
+        analysis: '作为提倡者（INFJ），你具有深刻的洞察力和同理心。你能够理解他人的感受和需求，善于提供深度的情感支持。你的直觉能力让你能够看到潜在的发展趋势和可能性。在决策时，你主要依靠价值观和对他人的关怀。你的优势在于创意思维和人际理解，但需要学会设定个人边界，避免过度投入他人的问题。'
+      },
+      'INFP': {
+        analysis: '作为调停者（INFP），你具有强烈的价值观和同理心。你理想主义而善良，总是希望能够帮助他人和改善世界。你的内向特质让你善于深度思考和自我反思，喜欢探索内心世界。在决策时，你主要依靠个人价值观和对他人的关怀。你的优势在于创意表达和理解他人，但需要提高处理冲突和自我主张的能力。'
+      },
+      'ENFJ': {
+        analysis: '作为主人公（ENFJ），你天生具有领导魅力和同理心。你善于激励和组织他人，能够营造积极的团队氛围。你的外向特质让你善于沟通和协调，在团队中自然扮演领导角色。在决策时，你主要考虑他人的感受和集体利益。你的优势在于人际激励和组织能力，但需要学会关注自己的需求，避免过度付出。'
+      },
+      'ENFP': {
+        analysis: '作为竞选者（ENFP），你充满热情和创意。你善于与人建立联系，能够在社交中展现个人魅力和正能量。你的外向特质让你喜欢新的体验和挑战，对生活充满热情。在决策时，你主要依靠价值观和对他人的关怀。你的优势在于人际连接和创意思维，但需要提高时间管理和专注坚持的能力。'
+      },
+      'ISTJ': {
+        analysis: '作为物流师（ISTJ），你具有强烈的责任感和组织能力。你注重细节和事实，善于制定和执行计划。在决策时，你主要依靠过去的经验和逻辑分析，倾向于传统和可靠的方法。你的内向特质让你喜欢有条理的工作环境，重视稳定性和可预测性。你的优势在于组织能力和执行力，但需要提高适应变化和创新思维的能力。'
+      },
+      'ISFJ': {
+        analysis: '作为守卫者（ISFJ），你天生具有照顾和保护他人的特质。你细心而温暖，总是能够注意到他人的需求并提供支持。你的内向特质让你善于观察和倾听，在团队中是可靠的后盾。在决策时，你主要考虑他人的感受和和谐。你的优势在于关怀他人和维护和谐，但需要学会表达自己的需求和处理冲突。'
+      },
+      'ESTJ': {
+        analysis: '作为总经理（ESTJ），你具有出色的组织和管理能力。你善于制定规则和流程，能够高效地组织资源和人员。你的外向特质让你善于领导和协调，在团队中自然扮演管理角色。在决策时，你主要依靠逻辑分析和实际经验。你的优势在于组织管理和执行力，但需要提高灵活性和对他人的情感关怀。'
+      },
+      'ESFJ': {
+        analysis: '作为执政官（ESFJ），你天生具有照顾和协调他人的能力。你善于营造和谐的团队氛围，总是能够关注到他人的需求。你的外向特质让你善于沟通和组织，在团队中是可靠的协调者。在决策时，你主要考虑他人的感受和集体利益。你的优势在于团队协调和关怀他人，但需要学会应对冲突和客观决策。'
+      },
+      'ISTP': {
+        analysis: '作为鉴赏家（ISTP），你具有出色的实践能力和问题解决技能。你善于理解和操作各种工具，能够快速解决实际问题。你的内向特质让你喜欢独立工作，需要充足的时间来思考和实验。在决策时，你主要依靠逻辑分析和实际经验。你的优势在于实践技能和适应能力，但需要提高长期规划和人际沟通能力。'
+      },
+      'ISFP': {
+        analysis: '作为探险家（ISFP），你具有丰富的创意和审美能力。你追求美和自我表达，善于通过各种艺术形式表达内心世界。你的内向特质让你善于观察和感受，对周围环境有敏锐的感知。在决策时，你主要依靠个人价值观和内在感受。你的优势在于创意表达和同理心，但需要提高决策效率和自我主张能力。'
+      },
+      'ESTP': {
+        analysis: '作为企业家（ESTP），你充满活力和行动力。你善于抓住机会，能够在快速变化的环境中做出反应。你的外向特质让你善于社交和协调，喜欢与人互动和合作。在决策时，你主要依靠实际经验和即时反馈。你的优势在于行动导向和适应能力，但需要提高长期规划和分析思考的能力。'
+      },
+      'ESFP': {
+        analysis: '作为娱乐家（ESFP），你活泼而友善，总是能够为周围带来欢乐和活力。你善于与人互动，享受当下，喜欢与他人分享快乐。你的外向特质让你在社交中很受欢迎，能够轻松建立新的联系。在决策时，你主要依靠对他人的关怀和当下的感受。你的优势在于人际互动和适应能力，但需要提高长期规划和分析思考能力。'
+      }
+    };
+
+    const profile = mbtiProfiles[mbtiType] || mbtiProfiles['INFP'];
+    return profile.analysis;
+  }
+
+  // 生成高级分析模拟响应（MBTI和贝尔宾）
+  generateAdvancedMockResponse(prompt) {
+    // 提取MBTI类型和贝尔宾角色信息
+    const mbtiMatch = prompt.match(/计算得出的MBTI类型:\s*([A-Z]{4})\s*（([^）]+)）/);
+    const belbinMatch = prompt.match(/计算得出的主要贝尔宾角色:\s*([^\n]+)/);
+
+    const mbtiType = mbtiMatch ? mbtiMatch[1] : 'INFP';
+    const mbtiName = mbtiMatch ? mbtiMatch[2] : '调停者';
+    const belbinRole = belbinMatch ? belbinMatch[1] : '协作者';
+
+    // 根据MBTI类型生成个性化分析
+    const mbtiAnalysis = this.generatePersonalizedMBTIAnalysis(mbtiType, mbtiName);
+
+    // 贝尔宾团队角色分析模板
+    const belbinAnalysis = `作为${belbinRole}，你在团队中扮演着重要的支持性角色。你天生具有促进团队和谐的能力，善于倾听和理解团队成员的需求和感受。在团队讨论中，你能够营造积极的氛围，让每个人都感到被重视和理解。
+
+你的优势在于建立信任和促进合作。你能够敏锐地察觉团队中的紧张关系，并主动采取措施缓解冲突。在团队决策过程中，你倾向于寻求共识，确保每个人的声音都被听到。
+
+在团队项目中，你是那个确保团队凝聚力的人，通过你的支持和关怀，让团队保持良好的工作状态和积极的心态。`;
+
+    // 职业发展建议
+    const careerDevelopment = `基于你的${mbtiName}特质和${belbinRole}角色特点，最适合你的职业发展路径应该结合以下几个方面：
+
+首先，选择能够发挥你同理心和创造力的工作环境。教育、心理咨询、人力资源、社会工作、创意设计等领域都与你的人格特质高度匹配。在这些环境中，你不仅能够发挥专业能力，还能够实现帮助他人的内在动机。
+
+其次，寻求能够提供一定自主性和灵活性的职位。你讨厌过于严格的规章制度和僵化的工作流程，更适合在相对自由的环境中发挥创造力。
+
+最后，考虑团队合作导向的工作。作为${belbinRole}，你在协作型团队中会如鱼得水，能够为团队和谐与效率做出重要贡献。`
+
+    // 个人成长策略
+    const personalGrowth = `为了更好地发挥你的性格优势并平衡发展潜力，建议你关注以下成长策略：
+
+1. 增强自我主张能力：学会在必要时表达自己的观点和需求，即使这可能引起短暂的不适。你的善良和同理心很宝贵，但也不应该以牺牲自己的需求为代价。
+
+2. 提高决策效率：虽然你倾向于深入思考各种可能性，但也要学会在适当时机做出决定。可以设定决策期限，避免过度分析。
+
+3. 拓展舒适区：适度尝试一些挑战性的活动和社交场合，这会帮助你建立更大的自信和适应能力。
+
+4. 发展实用技能：在保持理想主义的同时，也要注重一些实用技能的培养，这会让你的创意更容易落地实现。
+
+记住，成长不是要改变你的核心特质，而是让你更好地利用这些特质来创造价值。`
+
+    return `MBTI性格深度解析：${mbtiAnalysis}
+
+贝尔宾团队角色分析：${belbinAnalysis}
+
+职业发展建议：${careerDevelopment}
+
+个人成长策略：${personalGrowth}`
   }
 
   // 发送HTTP请求
@@ -322,9 +432,21 @@ ${relationshipAdvice[highestTrait]}
     }
   }
 
-  // 生成人格分析总结
+  // 生成完整的人格分析总结（包含MBTI和贝尔宾分析）
   async getPersonalitySummary(scores, answers) {
-    const prompt = `请基于以下大五人格测试结果，生成一份详细的性格分析报告：
+    try {
+      // 首先计算MBTI和贝尔宾角色
+      const { calculateMBTI } = require('./mbti-calculator')
+      const { calculateBelbinRoles } = require('./belbin-calculator')
+
+      const mbtiResult = calculateMBTI(scores)
+      const belbinResult = calculateBelbinRoles(scores)
+
+      console.log('计算的MBTI结果:', mbtiResult)
+      console.log('计算的贝尔宾结果:', belbinResult)
+
+      // 生成基础分析
+      const basicPrompt = `请基于以下大五人格测试结果，生成一份详细的性格分析报告：
 
 测试得分：
 - 开放性: ${scores.openness?.average || 0}/5.0
@@ -346,19 +468,58 @@ ${relationshipAdvice[highestTrait]}
 
 请用积极正面的语言，给予鼓励和实用建议。`
 
-    try {
-      const response = await this.callAI(prompt)
+      // 生成MBTI和贝尔宾的专门分析
+      const advancedPrompt = `基于以下测试结果，请提供专业的MBTI和贝尔宾团队角色分析：
 
-      // 尝试解析三个部分的内容
-      const content = response.content
-      const sections = this.parseSummarySections(content)
+大五人格得分：
+- 开放性: ${scores.openness?.average || 0}/5.0
+- 尽责性: ${scores.conscientiousness?.average || 0}/5.0
+- 外向性: ${scores.extraversion?.average || 0}/5.0
+- 宜人性: ${scores.agreeableness?.average || 0}/5.0
+- 神经质: ${scores.neuroticism?.average || 0}/5.0
+
+计算得出的MBTI类型: ${mbtiResult.type}（${mbtiResult.profile?.name || ''}）
+计算得出的主要贝尔宾角色: ${belbinResult.primaryRole?.name || ''}
+
+请提供以下深度分析：
+1. MBTI性格深度解析：详细解释${mbtiResult.type}类型的行为特征、思维模式和决策风格
+2. 贝尔宾团队角色分析：分析你在团队中的主要作用和贡献方式
+3. 职业发展建议：结合MBTI和贝尔宾角色，提供具体的职业规划建议
+4. 个人成长策略：基于性格特质，提供切实可行的自我提升建议
+
+要求：语言专业而亲和，内容具体实用，每部分150-250字。`
+
+      // 并行调用API提高效率
+      const [basicResponse, advancedResponse] = await Promise.all([
+        this.callAI(basicPrompt),
+        this.callAI(advancedPrompt)
+      ])
+
+      // 解析基础分析
+      const basicContent = basicResponse.content
+      const basicSections = this.parseSummarySections(basicContent)
+
+      // 解析高级分析
+      const advancedContent = advancedResponse.content
+      const advancedSections = this.parseAdvancedSections(advancedContent)
 
       return {
         success: true,
-        career: sections.career || '暂无职业建议',
-        personality: sections.personality || '暂无性格分析',
-        relationship: sections.relationship || '暂无人际关系建议',
-        fullContent: content
+        // 基础分析
+        career: basicSections.career || '暂无职业建议',
+        personality: basicSections.personality || '暂无性格分析',
+        relationship: basicSections.relationship || '暂无人际关系建议',
+        // MBTI和贝尔宾分析
+        mbtiAnalysis: advancedSections.mbtiAnalysis || '暂无MBTI分析',
+        belbinAnalysis: advancedSections.belbinAnalysis || '暂无贝尔宾分析',
+        careerDevelopment: advancedSections.careerDevelopment || '暂无职业发展建议',
+        personalGrowth: advancedSections.personalGrowth || '暂无个人成长建议',
+        // 计算结果
+        mbtiResult: mbtiResult,
+        belbinResult: belbinResult,
+        // 原始内容
+        fullContent: basicContent,
+        advancedContent: advancedContent
       }
     } catch (error) {
       console.error('生成人格分析总结失败:', error)
@@ -367,7 +528,11 @@ ${relationshipAdvice[highestTrait]}
         error: error.message,
         career: 'AI分析服务暂时不可用，请稍后重试',
         personality: 'AI分析服务暂时不可用，请稍后重试',
-        relationship: 'AI分析服务暂时不可用，请稍后重试'
+        relationship: 'AI分析服务暂时不可用，请稍后重试',
+        mbtiAnalysis: 'AI分析服务暂时不可用，请稍后重试',
+        belbinAnalysis: 'AI分析服务暂时不可用，请稍后重试',
+        careerDevelopment: 'AI分析服务暂时不可用，请稍后重试',
+        personalGrowth: 'AI分析服务暂时不可用，请稍后重试'
       }
     }
   }
@@ -438,6 +603,77 @@ ${relationshipAdvice[highestTrait]}
     }
 
     console.log('解析结果:', sections)
+    return sections
+  }
+
+  // 解析高级分析部分（MBTI和贝尔宾）
+  parseAdvancedSections(content) {
+    const sections = {}
+    const cleanContent = content.trim()
+
+    // 高级分析解析模式
+    const advancedPatterns = [
+      // MBTI分析模式
+      {
+        name: 'mbtiAnalysis',
+        patterns: [
+          /MBTI性格深度解析[：:]\s*([\s\S]*?)(?=贝尔宾团队角色分析|$)/i,
+          /1[、\.\s]*MBTI性格深度解析[：:]\s*([\s\S]*?)(?=2[、\.\s]*贝尔宾|$)/i,
+          /MBTI[：:]\s*([\s\S]*?)(?=贝尔宾|$)/i
+        ]
+      },
+      // 贝尔宾分析模式
+      {
+        name: 'belbinAnalysis',
+        patterns: [
+          /贝尔宾团队角色分析[：:]\s*([\s\S]*?)(?=职业发展建议|$)/i,
+          /2[、\.\s]*贝尔宾团队角色分析[：:]\s*([\s\S]*?)(?=3[、\.\s]*职业发展|$)/i,
+          /贝尔宾[：:]\s*([\s\S]*?)(?=职业发展|$)/i
+        ]
+      },
+      // 职业发展建议模式
+      {
+        name: 'careerDevelopment',
+        patterns: [
+          /职业发展建议[：:]\s*([\s\S]*?)(?=个人成长策略|$)/i,
+          /3[、\.\s]*职业发展建议[：:]\s*([\s\S]*?)(?=4[、\.\s]*个人成长|$)/i,
+          /职业发展[：:]\s*([\s\S]*?)(?=个人成长|$)/i
+        ]
+      },
+      // 个人成长策略模式
+      {
+        name: 'personalGrowth',
+        patterns: [
+          /个人成长策略[：:]\s*([\s\S]*?)$/i,
+          /4[、\.\s]*个人成长策略[：:]\s*([\s\S]*?)$/i,
+          /个人成长[：:]\s*([\s\S]*?)$/i
+        ]
+      }
+    ]
+
+    // 尝试解析每个部分
+    advancedPatterns.forEach(({ name, patterns }) => {
+      for (const pattern of patterns) {
+        const match = cleanContent.match(pattern)
+        if (match && match[1]) {
+          sections[name] = match[1].trim()
+          break
+        }
+      }
+
+      // 如果没有匹配到，提供默认内容
+      if (!sections[name]) {
+        const defaultContent = {
+          mbtiAnalysis: '基于你的MBTI类型，你具有独特的性格特质和行为模式，这影响着你与世界的互动方式。',
+          belbinAnalysis: '作为团队的特定角色类型，你有着独特的贡献方式和价值定位。',
+          careerDevelopment: '结合你的性格特点，建议寻找能够发挥你优势的工作环境和职业方向。',
+          personalGrowth: '通过了解自己的性格特质，你可以有针对性地制定个人成长计划。'
+        }
+        sections[name] = defaultContent[name]
+      }
+    })
+
+    console.log('高级分析解析结果:', sections)
     return sections
   }
 

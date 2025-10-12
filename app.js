@@ -1,11 +1,33 @@
 // app.js
 App({
   onLaunch: function () {
+    // 加载配置
+    this.loadConfig()
+    
     // 初始化TDesign主题
     this.initTheme()
 
+    // 清理旧数据
+    this.cleanupOldData()
+
     // 检查登录状态
     this.checkLoginStatus()
+  },
+
+  // 加载配置
+  loadConfig: function() {
+    try {
+      const config = require('./utils/config.js')
+      this.globalData.config = config.config
+      
+      // 设置Supabase连接信息
+      this.globalData.supabaseUrl = config.config.supabaseUrl
+      this.globalData.supabaseKey = config.config.supabaseKey
+      
+      console.log('配置加载成功')
+    } catch (error) {
+      console.error('配置加载失败:', error)
+    }
   },
 
   // 初始化TDesign浅色主题
@@ -30,6 +52,32 @@ App({
     if (userInfo) {
       this.globalData.userInfo = userInfo
       this.globalData.isLoggedIn = true
+    } else {
+      this.globalData.userInfo = null
+      this.globalData.isLoggedIn = false
+    }
+  },
+
+  // 全局登出方法
+  globalLogout: function() {
+    // 清除全局状态
+    this.globalData.userInfo = null
+    this.globalData.isLoggedIn = false
+
+    console.log('全局登出状态已更新')
+  },
+
+  // 清理旧数据
+  cleanupOldData: function() {
+    try {
+      // 清除旧的通用测试记录键
+      const oldTestData = wx.getStorageSync('testResults')
+      if (oldTestData) {
+        wx.removeStorageSync('testResults')
+        console.log('应用启动：已清除旧的测试记录数据')
+      }
+    } catch (error) {
+      console.error('应用启动清理旧数据失败:', error)
     }
   },
 
@@ -38,8 +86,9 @@ App({
     userInfo: null,
     isLoggedIn: false,
     theme: null,
-    supabaseUrl: 'https://klmgbsjigdwpwzczhdkp.supabase.co', // 需要替换为实际的Supabase URL
-    supabaseKey: 'YeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsbWdic2ppZ2R3cHd6Y3poZGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3MjE0NTksImV4cCI6MjA3NTI5NzQ1OX0.ygaQJVxZ9W2E25xXFf18irpG7pSalO1CvZvItdllePw', // 需要替换为实际的Supabase Key
-    aiApiUrl: 'YOUR_AI_API_URL' // 需要替换为实际的质谱AI API地址
+    supabaseUrl: '', // 从配置文件中获取
+    supabaseKey: '', // 从配置文件中获取
+    aiApiUrl: '', // 从配置文件中获取
+    config: null // 配置对象
   }
 })

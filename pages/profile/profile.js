@@ -1,4 +1,6 @@
 // pages/profile/profile.js
+const app = getApp()
+
 Page({
   data: {
     userInfo: null,
@@ -31,21 +33,58 @@ Page({
 
   // 加载用户统计数据
   loadUserStats: function () {
-    const testResults = wx.getStorageSync('testResults') || []
-
-    if (testResults.length > 0) {
-      const totalTests = testResults.length
-      const latestDate = testResults[0].testDate
-      const totalAverage = testResults.reduce((sum, result) => {
-        return sum + parseFloat(result.totalAverage || 0)
-      }, 0)
-      const averageScore = (totalAverage / totalTests).toFixed(1)
-
+    if (!this.data.isLoggedIn) {
       this.setData({
         stats: {
-          totalTests,
-          latestDate,
-          averageScore
+          totalTests: 0,
+          latestDate: null,
+          averageScore: 0
+        }
+      })
+      return
+    }
+
+    try {
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo) return
+
+      // 获取当前用户的测试历史
+      const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+      const testResults = wx.getStorageSync(userHistoryKey) || []
+
+      console.log(`加载用户 ${userInfo.nickName} 的统计数据:`, testResults.length, '条记录')
+
+      if (testResults.length > 0) {
+        const totalTests = testResults.length
+        const latestDate = testResults[0].testDate
+        const totalAverage = testResults.reduce((sum, result) => {
+          return sum + parseFloat(result.totalAverage || 0)
+        }, 0)
+        const averageScore = (totalAverage / totalTests).toFixed(1)
+
+        this.setData({
+          stats: {
+            totalTests,
+            latestDate,
+            averageScore
+          }
+        })
+      } else {
+        this.setData({
+          stats: {
+            totalTests: 0,
+            latestDate: null,
+            averageScore: 0
+          }
+        })
+      }
+    } catch (error) {
+      console.error('加载用户统计数据失败:', error)
+      this.setData({
+        stats: {
+          totalTests: 0,
+          latestDate: null,
+          averageScore: 0
         }
       })
     }
@@ -54,6 +93,21 @@ Page({
   // 登录
   handleLogin: function () {
     this.getUserProfile()
+  },
+
+  // 编辑资料
+  editProfile: function () {
+    if (!this.data.isLoggedIn) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'error'
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: '/pages/edit-profile/edit-profile'
+    })
   },
 
   // 获取用户信息
@@ -69,6 +123,12 @@ Page({
 
         // 保存用户信息
         wx.setStorageSync('userInfo', userInfo)
+
+        // 更新全局状态
+        app.globalData.userInfo = userInfo
+        app.globalData.isLoggedIn = true
+
+        console.log(`用户 ${userInfo.nickName} 已登录`)
 
         wx.showToast({
           title: '登录成功',
@@ -89,24 +149,79 @@ Page({
   handleLogout: function () {
     wx.showModal({
       title: '退出登录',
-      content: '确定要退出登录吗？',
+      content: '确定要退出登录吗？退出后将清除当前用户的本地数据。',
       confirmText: '退出',
       confirmColor: '#E34D59',
       success: (res) => {
         if (res.confirm) {
-          wx.removeStorageSync('userInfo')
-          this.setData({
-            userInfo: null,
-            isLoggedIn: false
-          })
+          try {
+            // 获取当前用户信息用于清理数据
+            const userInfo = wx.getStorageSync('userInfo')
 
-          wx.showToast({
-            title: '已退出登录',
-            icon: 'success'
-          })
+            // 清除用户测试记录数据
+            if (userInfo) {
+              const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+              wx.removeStorageSync(userHistoryKey)
+              console.log(`已清除用户 ${userInfo.nickName} 的测试记录数据`)
+            }
+
+            // 清除用户登录信息
+            wx.removeStorageSync('userInfo')
+
+            // 清除测试进度数据
+            wx.removeStorageSync('testProgress')
+
+            // 清除临时结果数据
+            wx.removeStorageSync('tempResult')
+            wx.removeStorageSync('currentTestAnswers')
+
+            // 清除旧的测试记录数据（如果存在）
+            this.cleanupOldData()
+
+            // 更新页面状态
+            this.setData({
+              userInfo: null,
+              isLoggedIn: false,
+              stats: {
+                totalTests: 0,
+                latestDate: null,
+                averageScore: 0
+              }
+            })
+
+            console.log(`用户 ${userInfo ? userInfo.nickName : 'unknown'} 已退出登录，本地数据已清除`)
+
+            // 调用全局登出方法
+            app.globalLogout()
+
+            wx.showToast({
+              title: '已退出登录',
+              icon: 'success'
+            })
+          } catch (error) {
+            console.error('退出登录失败:', error)
+            wx.showToast({
+              title: '退出失败',
+              icon: 'error'
+            })
+          }
         }
       }
     })
+  },
+
+  // 清理旧数据
+  cleanupOldData: function() {
+    try {
+      // 清除旧的通用测试记录键
+      const oldTestData = wx.getStorageSync('testResults')
+      if (oldTestData) {
+        wx.removeStorageSync('testResults')
+        console.log('已清除旧的测试记录数据')
+      }
+    } catch (error) {
+      console.error('清理旧数据失败:', error)
+    }
   },
 
   // 查看历史记录
@@ -157,15 +272,41 @@ Page({
 
   // 清除数据
   clearData: function () {
+    const isUserLoggedIn = this.data.isLoggedIn
+    const content = isUserLoggedIn
+      ? `确定要清除 ${this.data.userInfo.nickName} 的所有本地数据吗？包括测试记录和用户信息。`
+      : '确定要清除所有本地数据吗？包括测试记录和用户信息。'
+
     wx.showModal({
       title: '清除数据',
-      content: '确定要清除所有本地数据吗？包括测试记录和用户信息。',
+      content: content,
       confirmText: '清除',
       confirmColor: '#E34D59',
       success: (res) => {
         if (res.confirm) {
           try {
-            wx.clearStorageSync()
+            if (isUserLoggedIn) {
+              // 只清除当前用户的数据
+              const userInfo = wx.getStorageSync('userInfo')
+              if (userInfo) {
+                const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+                wx.removeStorageSync(userHistoryKey)
+                console.log(`已清除用户 ${userInfo.nickName} 的测试数据`)
+              }
+
+              // 清除用户登录信息
+              wx.removeStorageSync('userInfo')
+
+              // 清除通用数据
+              wx.removeStorageSync('testProgress')
+              wx.removeStorageSync('tempResult')
+              wx.removeStorageSync('currentTestAnswers')
+            } else {
+              // 如果未登录，清除所有数据
+              wx.clearStorageSync()
+            }
+
+            // 更新页面状态
             this.setData({
               userInfo: null,
               isLoggedIn: false,
@@ -175,6 +316,9 @@ Page({
                 averageScore: 0
               }
             })
+
+            // 调用全局登出方法
+            app.globalLogout()
 
             wx.showToast({
               title: '清除成功',
@@ -199,5 +343,31 @@ Page({
       path: '/pages/index/index',
       imageUrl: ''
     }
+  },
+
+  // 测试数据隔离功能（开发调试用）
+  testDataIsolation: function() {
+    console.log('=== 测试数据隔离功能 ===')
+
+    // 获取当前用户信息
+    const userInfo = wx.getStorageSync('userInfo')
+    console.log('当前用户:', userInfo)
+
+    // 检查用户特定的存储键
+    if (userInfo) {
+      const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+      const userData = wx.getStorageSync(userHistoryKey)
+      console.log(`用户 ${userInfo.nickName} 的测试记录:`, userData ? userData.length : 0, '条')
+    }
+
+    // 检查旧的数据键
+    const oldData = wx.getStorageSync('testResults')
+    console.log('旧数据键 testResults:', oldData ? oldData.length : 0, '条')
+
+    // 检查通用数据
+    const progress = wx.getStorageSync('testProgress')
+    console.log('测试进度:', progress ? '存在' : '不存在')
+
+    console.log('=== 测试完成 ===')
   }
 })

@@ -19,6 +19,17 @@
   border-radius: 20rpx;
   padding: 32rpx;
   backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.user-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-card:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .user-avatar {
@@ -46,13 +57,49 @@
   color: #6B7280;
 }
 
+.edit-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 12rpx;
+  margin-right: 16rpx;
+  transition: all 0.3s ease;
+}
+
+.edit-icon {
+  font-size: 24rpx;
+  margin-bottom: 4rpx;
+}
+
+.edit-text {
+  font-size: 20rpx;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.logout-section {
+  margin-top: 20rpx;
+  display: flex;
+  justify-content: center;
+}
+
 .logout-btn {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.9);
   color: var(--td-error-color, #E34D59);
   border: 2rpx solid var(--td-error-color, #E34D59);
-  border-radius: 16rpx;
-  padding: 12rpx 24rpx;
-  font-size: 24rpx;
+  border-radius: 20rpx;
+  padding: 16rpx 32rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.logout-btn:active {
+  transform: scale(0.95);
+  background: rgba(227, 77, 89, 0.1);
 }
 
 .login-avatar {

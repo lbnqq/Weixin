@@ -441,8 +441,17 @@ const answerOptions = [
   }
 ]
 
-module.exports = {
+// 微信小程序使用 module.exports 可能有问题，改为直接导出
+const testData = {
   questions,
   dimensions,
   answerOptions
 }
+
+// 为了兼容性，同时提供两种导出方式
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = testData
+}
+
+// 直接导出，供微信小程序使用
+export default testData

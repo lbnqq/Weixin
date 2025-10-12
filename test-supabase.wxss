@@ -1,0 +1,123 @@
+/* pages/test-supabase/test-supabase.wxss */
+.container {
+  padding: 40rpx;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #6b7280;
+}
+
+.test-result {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.result-text {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.user-info {
+  margin-bottom: 30rpx;
+}
+
+.user-card {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 30rpx;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.nickname {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 8rpx;
+}
+
+.openid {
+  display: block;
+  font-size: 24rpx;
+  color: #6b7280;
+  word-break: break-all;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.test-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.test-btn[disabled] {
+  opacity: 0.6;
+}
+
+.clear-btn {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.clear-btn[disabled] {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+.auth-btn {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 40rpx;
+}
+
+.loading text {
+  font-size: 28rpx;
+  color: #6b7280;
+}

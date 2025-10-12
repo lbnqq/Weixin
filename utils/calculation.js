@@ -269,20 +269,40 @@ function clearProgress() {
  */
 function saveTestResult(result) {
   try {
-    // 获取现有的测试结果
-    const existingResults = wx.getStorageSync('testResults') || []
+    // 获取当前用户信息
+    const userInfo = wx.getStorageSync('userInfo')
+    if (!userInfo) {
+      console.log('用户未登录，无法保存测试结果')
+      return false
+    }
 
-    // 添加新结果到开头
-    existingResults.unshift({
+    // 生成用户特定的存储key
+    const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+
+    // 获取当前用户的现有测试结果
+    const existingResults = wx.getStorageSync(userHistoryKey) || []
+
+    // 添加用户信息到结果中
+    const resultWithUserInfo = {
       ...result,
+      userInfo: {
+        nickName: userInfo.nickName,
+        avatarUrl: userInfo.avatarUrl
+      },
+      userId: userInfo.userId || userInfo.openid || 'anonymous',
       savedAt: new Date().toISOString(),
       timestamp: Date.now()
-    })
+    }
+
+    // 添加新结果到开头
+    existingResults.unshift(resultWithUserInfo)
 
     // 最多保存10条本地记录
     const limitedResults = existingResults.slice(0, 10)
 
-    wx.setStorageSync('testResults', limitedResults)
+    wx.setStorageSync(userHistoryKey, limitedResults)
+    console.log(`已保存用户 ${userInfo.nickName} 的测试结果，总计 ${limitedResults.length} 条记录`)
+
     return true
   } catch (error) {
     console.error('保存测试结果失败:', error)

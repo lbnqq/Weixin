@@ -66,13 +66,38 @@
     <view wx:if="{{aiSummary}}" class="summary-section">
       <view class="section-title">AI智能分析</view>
 
-      <view class="summary-content">
+      <!-- 分析标签页切换 -->
+      <view class="analysis-tabs">
+        <view class="tab-item {{activeTab === 'personality' ? 'active' : ''}}"
+              bindtap="switchTab" data-tab="personality">
+          <text class="tab-icon">🧠</text>
+          <text class="tab-text">基础分析</text>
+        </view>
+        <view class="tab-item {{activeTab === 'mbti' ? 'active' : ''}}"
+              bindtap="switchTab" data-tab="mbti">
+          <text class="tab-icon">🎭</text>
+          <text class="tab-text">MBTI类型</text>
+        </view>
+        <view class="tab-item {{activeTab === 'belbin' ? 'active' : ''}}"
+              bindtap="switchTab" data-tab="belbin">
+          <text class="tab-icon">👥</text>
+          <text class="tab-text">团队角色</text>
+        </view>
+        <view class="tab-item {{activeTab === 'career' ? 'active' : ''}}"
+              bindtap="switchTab" data-tab="career">
+          <text class="tab-icon">🚀</text>
+          <text class="tab-text">发展建议</text>
+        </view>
+      </view>
+
+      <!-- 基础分析内容 -->
+      <view wx:if="{{activeTab === 'personality'}}" class="tab-content">
         <view class="content-item personality-item">
           <view class="content-header">
             <text class="content-icon personality-icon">🧠</text>
             <text class="content-title personality-title">性格分析</text>
           </view>
-          <view class="content-text personality-text" style="padding: 24rpx; font-size: 28rpx; line-height: 1.8; color: #374151;">
+          <view class="content-text personality-text">
             <text>{{aiSummary.personality}}</text>
           </view>
         </view>
@@ -82,7 +107,7 @@
             <text class="content-icon career-icon">💼</text>
             <text class="content-title career-title">职业建议</text>
           </view>
-          <view class="content-text career-text" style="padding: 24rpx; font-size: 28rpx; line-height: 1.8; color: #374151;">
+          <view class="content-text career-text">
             <text>{{aiSummary.career}}</text>
           </view>
         </view>
@@ -92,8 +117,188 @@
             <text class="content-icon relationship-icon">🤝</text>
             <text class="content-title relationship-title">人际关系</text>
           </view>
-          <view class="content-text relationship-text" style="padding: 24rpx; font-size: 28rpx; line-height: 1.8; color: #374151;">
+          <view class="content-text relationship-text">
             <text>{{aiSummary.relationship}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- MBTI分析内容 -->
+      <view wx:if="{{activeTab === 'mbti' && mbtiResult}}" class="tab-content">
+        <!-- MBTI类型展示 -->
+        <view class="mbti-header">
+          <view class="mbti-type-display">
+            <text class="mbti-type-code">{{mbtiResult.type}}</text>
+            <text class="mbti-type-name">{{mbtiResult.profile.name}}</text>
+            <view class="mbti-confidence">
+              <text class="confidence-text">置信度: {{mbtiResult.confidence}}%</text>
+              <view class="confidence-bar">
+                <view class="confidence-fill" style="width: {{mbtiResult.confidence}}%"></view>
+              </view>
+            </view>
+          </view>
+          <view class="mbti-actions">
+            <button class="copy-btn" bindtap="copyMBTIType">
+              <text class="copy-icon">📋</text>
+              <text>复制</text>
+            </button>
+          </view>
+        </view>
+
+        <!-- MBTI维度分析 -->
+        <view class="mbti-dimensions">
+          <view wx:for="{{mbtiResult.dimensions}}" wx:key="type" class="dimension-item">
+            <view class="dimension-header">
+              <text class="dimension-code">{{item.type}}</text>
+              <text class="dimension-name">{{item.chineseName}} ({{item.fullType}})</text>
+              <text class="dimension-score">{{item.score}}</text>
+            </view>
+            <view class="dimension-desc">
+              <text>{{item.description}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- MBTI详细分析 -->
+        <view class="content-item mbti-analysis-item">
+          <view class="content-header">
+            <text class="content-icon mbti-icon">🎭</text>
+            <text class="content-title mbti-title">MBTI性格深度解析</text>
+          </view>
+          <view class="content-text mbti-text">
+            <text>{{aiSummary.mbtiAnalysis}}</text>
+          </view>
+        </view>
+
+        <!-- MBTI特征描述 -->
+        <view wx:if="{{mbtiResult.profile}}" class="mbti-traits">
+          <view class="traits-header">
+            <text class="traits-title">性格特征</text>
+          </view>
+          <view class="traits-grid">
+            <view wx:for="{{mbtiResult.profile.traits}}" wx:key="*this" class="trait-chip">
+              <text>{{item}}</text>
+            </view>
+          </view>
+          <view class="mbti-careers">
+            <text class="careers-title">适合职业</text>
+            <view class="careers-list">
+              <text wx:for="{{mbtiResult.profile.career}}" wx:key="*this" class="career-tag">{{item}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 贝尔宾团队角色分析 -->
+      <view wx:if="{{activeTab === 'belbin' && belbinResult}}" class="tab-content">
+        <!-- 主要角色展示 -->
+        <view class="belbin-header">
+          <view class="belbin-primary-role">
+            <text class="role-title">主要团队角色</text>
+            <view class="role-display">
+              <text class="role-name">{{belbinResult.primaryRole.name}}</text>
+              <view class="role-fit-score">
+                <text>适配度: {{belbinResult.primaryRole.fitScore}}%</text>
+                <view class="fit-bar">
+                  <view class="fit-fill" style="width: {{belbinResult.primaryRole.fitScore}}%"></view>
+                </view>
+              </view>
+            </view>
+            <view class="role-actions">
+              <button class="copy-btn" bindtap="copyBelbinRole">
+                <text class="copy-icon">📋</text>
+                <text>复制</text>
+              </button>
+            </view>
+          </view>
+        </view>
+
+        <!-- 角色详细描述 -->
+        <view class="content-item belbin-analysis-item">
+          <view class="content-header">
+            <text class="content-icon belbin-icon">👥</text>
+            <text class="content-title belbin-title">贝尔宾团队角色分析</text>
+          </view>
+          <view class="content-text belbin-text">
+            <text>{{aiSummary.belbinAnalysis}}</text>
+          </view>
+        </view>
+
+        <!-- 角色特征 -->
+        <view wx:if="{{belbinResult.primaryRole}}" class="role-details">
+          <view class="role-section">
+            <text class="role-section-title">关键特征</text>
+            <view class="role-traits">
+              <view wx:for="{{belbinResult.primaryRole.keyTraits}}" wx:key="*this" class="role-trait-item">
+                <text class="trait-bullet">•</text>
+                <text class="trait-text">{{item}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="role-section">
+            <text class="role-section-title">团队贡献</text>
+            <view class="role-contributions">
+              <view wx:for="{{belbinResult.primaryRole.contributions}}" wx:key="*this" class="role-contribution-item">
+                <text class="contribution-icon">✓</text>
+                <text class="contribution-text">{{item}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="role-section">
+            <text class="role-section-title">发展建议</text>
+            <view class="role-development">
+              <view wx:for="{{belbinResult.primaryRole.development}}" wx:key="*this" class="role-development-item">
+                <text class="development-icon">🎯</text>
+                <text class="development-text">{{item}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 辅助角色 -->
+        <view wx:if="{{belbinResult.secondaryRoles.length > 0}}" class="secondary-roles">
+          <text class="secondary-title">辅助角色</text>
+          <view class="secondary-roles-list">
+            <view wx:for="{{belbinResult.secondaryRoles}}" wx:key="name" class="secondary-role-item">
+              <text class="secondary-role-name">{{item.name}}</text>
+              <text class="secondary-role-fit">适配度: {{item.fitScore}}%</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 职业发展建议 -->
+      <view wx:if="{{activeTab === 'career'}}" class="tab-content">
+        <view class="content-item career-development-item">
+          <view class="content-header">
+            <text class="content-icon career-dev-icon">🚀</text>
+            <text class="content-title career-dev-title">职业发展建议</text>
+          </view>
+          <view class="content-text career-dev-text">
+            <text>{{aiSummary.careerDevelopment}}</text>
+          </view>
+        </view>
+
+        <view class="content-item personal-growth-item">
+          <view class="content-header">
+            <text class="content-icon growth-icon">🌱</text>
+            <text class="content-title growth-title">个人成长策略</text>
+          </view>
+          <view class="content-text growth-text">
+            <text>{{aiSummary.personalGrowth}}</text>
+          </view>
+        </view>
+
+        <!-- 综合建议 -->
+        <view class="comprehensive-advice">
+          <text class="advice-title">💡 综合建议</text>
+          <view class="advice-content">
+            <text class="advice-text">
+              结合你的MBTI类型{{mbtiResult.type}}和贝尔宾角色{{belbinResult.primaryRole.name}}，
+              建议你在职业选择和个人发展中充分发挥自己的独特优势。
+            </text>
           </view>
         </view>
       </view>
@@ -102,8 +307,8 @@
     <!-- 操作按钮 -->
     <view class="actions-section">
       <button class="action-btn primary" bindtap="shareResult">
-        <text class="btn-icon">📤</text>
-        <text class="btn-text">分享结果</text>
+        <text class="btn-icon">📷</text>
+        <text class="btn-text">保存到相册</text>
       </button>
 
       <button class="action-btn secondary" bindtap="retakeTest">

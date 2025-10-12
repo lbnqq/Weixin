@@ -4,7 +4,12 @@
     "pages/test/test",
     "pages/result/result",
     "pages/history/history",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/edit-profile/edit-profile",
+    "pages/agreement/agreement",
+    "pages/privacy/privacy",
+    "test-supabase",
+    "test-supabase-storage"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -34,8 +39,8 @@
     ]
   },
   "permission": {
-    "scope.userInfo": {
-      "desc": "用于获取用户头像和昵称信息"
+    "scope.userLocation": {
+      "desc": "用于获取用户位置信息"
     }
   },
   "requiredBackgroundModes": [],
