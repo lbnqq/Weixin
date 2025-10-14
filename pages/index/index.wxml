@@ -1,54 +1,12 @@
 <!--pages/index/index.wxml-->
 <view class="container">
-  <!-- 头部用户信息 -->
+  <!-- 头部欢迎信息 -->
   <view class="header">
-    <view wx:if="{{isLoggedIn}}" class="user-info">
-      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
-      <view class="user-details">
-        <text class="nickname">{{userInfo.nickName}}</text>
-        <text class="welcome">欢迎回来！准备好了解自己的性格了吗？</text>
-      </view>
-    </view>
-    <view wx:else class="login-prompt">
-      <view class="login-card">
-        <view class="login-header">
-          <view class="login-avatar">
-            <text class="avatar-icon">👤</text>
-          </view>
-          <view class="login-title">
-            <text class="title-main">欢迎使用大五人格测试</text>
-            <text class="title-sub">登录后体验完整功能，保存测试记录</text>
-          </view>
-        </view>
-        
-        <view class="login-features">
-          <view class="feature-item">
-            <view class="feature-icon">📊</view>
-            <text class="feature-text">保存测试记录</text>
-          </view>
-          <view class="feature-item">
-            <view class="feature-icon">🤖</view>
-            <text class="feature-text">AI个性分析</text>
-          </view>
-          <view class="feature-item">
-            <view class="feature-icon">📈</view>
-            <text class="feature-text">成长轨迹追踪</text>
-          </view>
-        </view>
-        
-        <button class="wechat-login-btn" bindtap="showLoginModal">
-          <view class="btn-icon">
-            <text class="wechat-icon-text">💬</text>
-          </view>
-          <text class="btn-text">微信快速登录</text>
-        </button>
-        
-        <view class="login-agreement">
-          <text class="agreement-prefix">登录即表示同意</text>
-          <text class="agreement-link" bindtap="viewAgreement">《用户协议》</text>
-          <text class="agreement-separator">和</text>
-          <text class="agreement-link" bindtap="viewPrivacy">《隐私政策》</text>
-        </view>
+    <view class="welcome-section">
+      <view class="welcome-icon">🧠</view>
+      <view class="welcome-content">
+        <text class="welcome-title">大五人格测试</text>
+        <text class="welcome-desc">深入了解自己的性格特征，发现更好的自己</text>
       </view>
     </view>
   </view>
@@ -168,74 +126,5 @@
   <!-- 底部提示 -->
   <view class="footer">
     <text class="footer-text">测试约需10-15分钟，建议在安静环境下完成</text>
-  </view>
-
-  <!-- 登录弹窗 -->
-  <view wx:if="{{showLoginModal}}" class="login-modal">
-    <view class="modal-mask" bindtap="hideLoginModal"></view>
-    <view class="modal-content">
-      <view class="modal-header">
-        <view class="modal-logo">
-          <text class="logo-text">🧠</text>
-        </view>
-        <view class="modal-close" bindtap="hideLoginModal">
-          <text class="close-icon">×</text>
-        </view>
-      </view>
-      
-      <view class="modal-body">
-        <view class="modal-title-section">
-          <text class="modal-title">微信授权登录</text>
-          <text class="modal-subtitle">获取您的头像和昵称，提供更好的服务体验</text>
-        </view>
-        
-        <view class="permission-list">
-          <view class="permission-item">
-            <view class="permission-icon">👤</view>
-            <view class="permission-info">
-              <text class="permission-title">获取头像和昵称</text>
-              <text class="permission-desc">用于展示您的个人信息</text>
-            </view>
-          </view>
-          <view class="permission-item">
-            <view class="permission-icon">📊</view>
-            <view class="permission-info">
-              <text class="permission-title">保存测试记录</text>
-              <text class="permission-desc">记录您的测试历史和结果</text>
-            </view>
-          </view>
-        </view>
-        
-        <view class="agreement-section">
-          <view class="agreement-header">
-            <view class="agreement-checkbox {{agreedToAgreement ? 'checked' : ''}}" bindtap="toggleAgreement">
-              <text wx:if="{{agreedToAgreement}}" class="check-mark">✓</text>
-            </view>
-            <text class="agreement-title">阅读并同意以下协议</text>
-          </view>
-          <view class="agreement-links">
-            <view class="link-item" bindtap="viewAgreementInModal">
-              <text class="link-text">《用户协议》</text>
-              <text class="link-arrow">›</text>
-            </view>
-            <view class="link-item" bindtap="viewPrivacyInModal">
-              <text class="link-text">《隐私政策》</text>
-              <text class="link-arrow">›</text>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <view class="modal-footer">
-        <button class="modal-btn cancel-btn" bindtap="hideLoginModal">取消</button>
-        <button class="modal-btn confirm-btn {{!agreedToAgreement ? 'disabled' : ''}}" 
-                bindtap="confirmLogin" disabled="{{!agreedToAgreement}}">
-          <view class="btn-icon">
-            <text class="wechat-icon-small">💬</text>
-          </view>
-          <text class="btn-text">确认登录</text>
-        </button>
-      </view>
-    </view>
   </view>
 </view>

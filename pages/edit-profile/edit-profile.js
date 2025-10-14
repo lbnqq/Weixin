@@ -225,23 +225,24 @@ Page({
       isSaving: true
     })
 
-    // 模拟保存过程
-    setTimeout(() => {
-      try {
-        // 更新用户信息
-        const updatedUserInfo = {
-          ...this.data.userInfo,
-          nickName: nickname,
-          avatarUrl: this.data.tempAvatarUrl || this.data.userInfo.avatarUrl
-        }
+    // 先保存到本地存储
+    try {
+      // 更新用户信息
+      const updatedUserInfo = {
+        ...this.data.userInfo,
+        nickName: nickname,
+        avatarUrl: this.data.tempAvatarUrl || this.data.userInfo.avatarUrl
+      }
 
-        // 保存到本地存储
-        wx.setStorageSync('userInfo', updatedUserInfo)
+      // 保存到本地存储
+      wx.setStorageSync('userInfo', updatedUserInfo)
 
-        // 更新全局数据
-        const app = getApp()
-        app.globalData.userInfo = updatedUserInfo
+      // 更新全局数据
+      const app = getApp()
+      app.globalData.userInfo = updatedUserInfo
 
+      // 同步更新到Supabase数据库
+      this.updateUserInfoToSupabase(updatedUserInfo).then(() => {
         // 更新页面数据
         this.setData({
           userInfo: updatedUserInfo,
@@ -267,19 +268,44 @@ Page({
 
         // 通知其他页面更新
         this.notifyProfileUpdate()
-
-      } catch (error) {
-        console.error('保存失败:', error)
+      }).catch((error) => {
+        console.error('同步到Supabase失败:', error)
+        // 即使Supabase更新失败，本地已经保存成功，仍然显示成功
         this.setData({
-          isSaving: false
+          userInfo: updatedUserInfo,
+          originalAvatarUrl: updatedUserInfo.avatarUrl,
+          originalNickname: updatedUserInfo.nickName,
+          isSaving: false,
+          hasChanges: false,
+          showSaveSuccess: true
         })
+
+        setTimeout(() => {
+          this.setData({
+            showSaveSuccess: false
+          })
+        }, 2000)
+
         wx.showToast({
-          title: '保存失败',
-          icon: 'error',
-          duration: 2000
+          title: '本地保存成功',
+          icon: 'success',
+          duration: 1500
         })
-      }
-    }, 1000) // 模拟网络延迟
+
+        // 通知其他页面更新
+        this.notifyProfileUpdate()
+      })
+    } catch (error) {
+      console.error('保存失败:', error)
+      this.setData({
+        isSaving: false
+      })
+      wx.showToast({
+        title: '保存失败',
+        icon: 'error',
+        duration: 2000
+      })
+    }
   },
 
   // 重置变更
@@ -318,6 +344,42 @@ Page({
     } else {
       wx.navigateBack()
     }
+  },
+
+  // 更新用户信息到Supabase数据库
+  updateUserInfoToSupabase: function(userInfo) {
+    return new Promise((resolve, reject) => {
+      const { supabase } = require('../../utils/supabase.js')
+      
+      // 获取用户ID
+      const userId = userInfo.userId
+      if (!userId) {
+        console.error('用户ID不存在，无法更新Supabase')
+        reject(new Error('用户ID不存在'))
+        return
+      }
+      
+      // 准备更新数据
+      const updateData = {
+        nickname: userInfo.nickName,
+        avatar_url: userInfo.avatarUrl,
+        updated_at: new Date().toISOString()
+      }
+      
+      console.log('准备更新Supabase用户信息:', userId, updateData)
+      console.log('当前用户信息:', userInfo)
+      
+      // 更新用户信息
+      supabase.update('users', updateData, { id: userId })
+        .then((data) => {
+          console.log('Supabase用户信息更新成功:', data)
+          resolve(data)
+        })
+        .catch((error) => {
+          console.error('Supabase用户信息更新失败:', error)
+          reject(error)
+        })
+    })
   },
 
   // 通知其他页面用户信息已更新

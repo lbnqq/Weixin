@@ -16,6 +16,20 @@ Page({
     })
   },
 
+  onUnload: function() {
+    // 页面卸载时，如果有fromModal参数，需要清除它
+    const pages = getCurrentPages()
+    if (pages.length > 1) {
+      const prevPage = pages[pages.length - 2]
+      if (prevPage && prevPage.route === 'pages/profile/profile') {
+        // 清除fromModal参数，避免重复触发登录弹窗
+        if (prevPage.options && prevPage.options.fromModal) {
+          delete prevPage.options.fromModal
+        }
+      }
+    }
+  },
+
   // 分享功能
   onShareAppMessage: function() {
     return {

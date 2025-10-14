@@ -64,6 +64,9 @@ App({
     this.globalData.userInfo = null
     this.globalData.isLoggedIn = false
 
+    // 清除登录凭证
+    wx.removeStorageSync('loginCode')
+
     console.log('全局登出状态已更新')
   },
 
