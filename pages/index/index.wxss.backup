@@ -53,20 +53,21 @@
 
 .test-card {
   background: white;
-  border-radius: 32rpx;
-  padding: 40rpx 32rpx;
-  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.1);
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
 }
 
 .test-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 32rpx;
 }
 
 .test-icon {
-  font-size: 64rpx;
-  margin-right: 24rpx;
+  font-size: 48rpx;
+  margin-right: 20rpx;
+  margin-top: 8rpx;
 }
 
 .test-info {
@@ -78,44 +79,47 @@
   font-size: 36rpx;
   font-weight: 700;
   color: #1F2937;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
 }
 
 .test-description {
   font-size: 28rpx;
   color: #6B7280;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* 进度区域 */
+/* 进度显示 */
 .progress-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #F3F4F5;
   border-radius: 16rpx;
   padding: 24rpx;
   margin-bottom: 32rpx;
+  border-left: 6rpx solid var(--td-brand-color, #0052D9);
 }
 
 .progress-info {
-  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .progress-text {
-  display: block;
   font-size: 28rpx;
-  margin-bottom: 8rpx;
+  color: #1F2937;
+  font-weight: 500;
 }
 
 .progress-date {
   font-size: 24rpx;
-  opacity: 0.9;
+  color: #6B7280;
 }
 
-/* 测试特性 */
+/* 功能特点 */
 .test-features {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
-  margin-bottom: 40rpx;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
 }
 
 .feature-item {
@@ -127,16 +131,16 @@
 }
 
 .feature-icon {
-  font-size: 32rpx;
+  font-size: 24rpx;
   margin-right: 12rpx;
 }
 
 .feature-text {
   font-size: 26rpx;
-  color: #4B5563;
+  color: #374151;
 }
 
-/* 测试操作按钮 */
+/* 测试按钮 */
 .test-actions {
   display: flex;
   gap: 16rpx;
@@ -144,13 +148,26 @@
 
 .start-btn {
   flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.4);
 }
 
 .restart-btn {
-  flex: 1;
+  padding: 20rpx 32rpx;
+  background: transparent;
+  color: #6B7280;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 16rpx;
+  font-size: 28rpx;
 }
 
-/* 最近测试记录 */
+/* 最近记录 */
 .recent-section {
   padding: 0 24rpx 32rpx;
 }
@@ -164,12 +181,12 @@
 
 .section-title {
   font-size: 32rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: white;
 }
 
 .section-subtitle {
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -180,16 +197,13 @@
 }
 
 .recent-item {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   border-radius: 16rpx;
   padding: 24rpx;
-  transition: all 0.3s ease;
-}
-
-.recent-item:active {
-  transform: scale(0.98);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
 .recent-info {
@@ -199,6 +213,7 @@
 .recent-date {
   font-size: 28rpx;
   color: #1F2937;
+  font-weight: 500;
   margin-bottom: 8rpx;
 }
 
@@ -208,114 +223,58 @@
 }
 
 .recent-arrow {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: #9CA3AF;
+  margin-left: 16rpx;
 }
 
 /* 功能介绍 */
 .features-section {
-  padding: 0 24rpx 48rpx;
+  padding: 0 24rpx 40rpx;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20rpx;
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 16rpx;
-  padding: 24rpx 16rpx;
+  padding: 32rpx 20rpx;
   text-align: center;
-  transition: all 0.3s ease;
-}
-
-.feature-card:active {
-  transform: scale(0.95);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
 .feature-card-icon {
-  font-size: 48rpx;
-  margin-bottom: 12rpx;
+  font-size: 40rpx;
+  margin-bottom: 16rpx;
+  display: block;
 }
 
 .feature-card-title {
   display: block;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 600;
   color: #1F2937;
-  margin-bottom: 6rpx;
+  margin-bottom: 8rpx;
 }
 
 .feature-card-desc {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #6B7280;
+  line-height: 1.4;
 }
 
-/* 底部提示 */
+/* 底部 */
 .footer {
-  padding: 32rpx 24rpx;
+  padding: 24rpx;
   text-align: center;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .footer-text {
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* 通用卡片样式 */
-.card {
-  background: white;
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
-}
-
-/* 按钮样式 */
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 12rpx;
-  padding: 24rpx 48rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.3);
-  transition: all 0.3s ease;
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.3);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: #667eea;
-  border: 2rpx solid #667eea;
-  border-radius: 12rpx;
-  padding: 24rpx 48rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-secondary:active {
-  transform: scale(0.98);
-  background: rgba(102, 126, 234, 0.1);
-}
-
-/* 响应式设计 */
-@media (max-width: 750rpx) {
-  .test-features {
-    grid-template-columns: 1fr;
-  }
-  
-  .features-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .test-actions {
-    flex-direction: column;
-  }
+  color: rgba(255, 255, 255, 0.7);
 }

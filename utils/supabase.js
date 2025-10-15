@@ -66,7 +66,10 @@ class SupabaseClient {
     const queryString = this.buildQueryString(conditions)
     return this.request(`/rest/v1/${table}?${queryString}`, {
       method: 'PATCH',
-      data
+      data,
+      headers: {
+        'Prefer': 'return=representation' // 确保返回更新后的数据
+      }
     })
   }
 
@@ -171,7 +174,22 @@ class SupabaseQuery {
   // 获取单条记录
   async single() {
     const result = await this.execute()
-    return Array.isArray(result) && result.length > 0 ? result[0] : null
+    
+    // 处理不同的返回格式
+    if (result && result.data !== undefined && result.error !== undefined) {
+      // 标准supabase返回格式
+      if (result.error) {
+        throw result.error
+      }
+      return result.data
+    }
+    
+    // 直接返回数据格式
+    if (Array.isArray(result) && result.length > 0) {
+      return result[0]
+    }
+    
+    return result || null
   }
 
   // 执行查询（别名）

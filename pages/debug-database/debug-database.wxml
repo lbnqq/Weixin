@@ -1,0 +1,191 @@
+<view class="debug-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">🔧 Supabase 数据库调试工具</text>
+    <text class="page-subtitle">诊断和修复数据库连接问题</text>
+  </view>
+
+  <!-- 快速导航 -->
+  <view class="action-section">
+    <view class="button-group">
+      <t-button 
+        theme="primary" 
+        size="medium"
+        variant="outline"
+        bindtap="goToConnectionTest"
+        block>
+        🔗 连接测试
+      </t-button>
+      <t-button 
+        theme="primary" 
+        size="medium"
+        variant="outline"
+        bindtap="goToDynamicCrudTest"
+        block>
+        ⚡ 动态测试
+      </t-button>
+    </view>
+  </view>
+
+  <!-- 连接状态 -->
+  <view class="status-section">
+    <view class="status-card">
+      <text class="status-label">连接状态：</text>
+      <text class="status-value {{connectionStatus === '连接正常' ? 'status-success' : 'status-error'}}">
+        {{connectionStatus}}
+      </text>
+    </view>
+    
+    <view class="status-card" wx:if="{{dbInfo}}">
+      <text class="status-label">数据库信息：</text>
+      <text class="status-value">{{dbInfo.status}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <view class="button-group">
+      <t-button 
+        theme="primary" 
+        size="medium"
+        bindtap="testConnection"
+        loading="{{isTesting && currentTest.includes('连接')}}"
+        disabled="{{isTesting}}">
+        测试连接
+      </t-button>
+      
+      <t-button 
+        theme="primary" 
+        size="medium"
+        variant="outline"
+        bindtap="checkTableStructure"
+        loading="{{isTesting && currentTest.includes('结构')}}"
+        disabled="{{isTesting}}">
+        检查表结构
+      </t-button>
+    </view>
+    
+    <view class="button-group">
+      <t-button 
+        theme="success" 
+        size="medium"
+        bindtap="testUserOperations"
+        loading="{{isTesting && currentTest.includes('用户')}}"
+        disabled="{{isTesting}}"
+        wx:if="{{userInfo}}">
+        测试用户操作
+      </t-button>
+      
+      <t-button 
+        theme="warning" 
+        size="medium"
+        variant="outline"
+        bindtap="runFullTestSuite"
+        loading="{{isTesting && currentTest.includes('完整')}}"
+        disabled="{{isTesting}}">
+        完整测试
+      </t-button>
+    </view>
+    
+    <view class="button-group">
+      <t-button 
+        theme="danger" 
+        size="small"
+        variant="outline"
+        bindtap="cleanupTestData"
+        disabled="{{isTesting}}">
+        清理测试数据
+      </t-button>
+      
+      <t-button 
+        theme="default" 
+        size="small"
+        variant="outline"
+        bindtap="clearResults"
+        disabled="{{isTesting}}">
+        清空结果
+      </t-button>
+    </view>
+  </view>
+
+  <!-- 当前测试状态 -->
+  <view class="testing-status" wx:if="{{isTesting}}">
+    <t-loading theme="spinner" size="20px" />
+    <text class="testing-text">{{currentTest}}</text>
+  </view>
+
+  <!-- 测试结果 -->
+  <view class="results-section" wx:if="{{testResults.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">📊 测试结果</text>
+      <text class="result-count">{{testResults.length}} 项</text>
+    </view>
+    
+    <scroll-view scroll-y class="results-scroll">
+      <view class="result-item" wx:for="{{testResults}}" wx:key="time">
+        <view class="result-header">
+          <t-tag 
+            theme="{{item.type === 'success' ? 'success' : item.type === 'error' ? 'danger' : 'primary'}}" 
+            size="small">
+            {{item.type === 'success' ? '成功' : item.type === 'error' ? '失败' : '信息'}}
+          </t-tag>
+          <text class="result-time">{{item.time}}</text>
+        </view>
+        <text class="result-message">{{item.message}}</text>
+        <view class="result-data" wx:if="{{item.data}}">
+          <text class="data-label">数据：</text>
+          <text class="data-content">{{item.formattedData}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 数据库用户列表 -->
+  <view class="users-section" wx:if="{{dbUsers.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">👥 数据库用户 ({{dbUsers.length}})</text>
+    </view>
+    
+    <scroll-view scroll-y class="users-scroll">
+      <t-cell-group>
+        <t-cell 
+          wx:for="{{dbUsers}}" 
+          wx:key="id"
+          title="{{item.nickname || '未命名用户'}}"
+          description="ID: {{item.id}} | OpenID: {{item.openid}}"
+          note="{{item.created_at}}">
+        </t-cell>
+      </t-cell-group>
+    </scroll-view>
+  </view>
+
+  <!-- 错误信息 -->
+  <view class="errors-section" wx:if="{{errors.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">❌ 错误信息</text>
+      <text class="error-count">{{errors.length}} 项</text>
+    </view>
+    
+    <scroll-view scroll-y class="errors-scroll">
+      <view class="error-item" wx:for="{{errors}}" wx:key="time" data-index="{{index}}" bindtap="copyErrorInfo">
+        <view class="error-header">
+          <text class="error-context">{{item.context}}</text>
+          <text class="error-time">{{item.time}}</text>
+        </view>
+        <text class="error-message">{{item.message}}</text>
+        <text class="copy-hint">点击复制详细信息</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 返回按钮 -->
+  <view class="footer-section">
+    <t-button 
+      theme="primary" 
+      size="large"
+      block
+      bindtap="goBack">
+      返回首页
+    </t-button>
+  </view>
+</view>

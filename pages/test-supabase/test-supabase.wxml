@@ -1,0 +1,82 @@
+<!--pages/test-supabase/test-supabase.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">Supabase 用户信息更新测试</text>
+  </view>
+
+  <view class="test-section">
+    <view class="section-title">当前用户信息</view>
+    <view class="user-info">
+      <view class="info-item">
+        <text class="label">用户ID：</text>
+        <text class="value">{{userInfo.userId || '未获取'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">OpenID：</text>
+        <text class="value">{{userInfo.openid || '未获取'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">昵称：</text>
+        <text class="value">{{userInfo.nickName || '未设置'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">头像：</text>
+        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      </view>
+    </view>
+  </view>
+
+  <view class="test-section">
+    <view class="section-title">测试数据</view>
+    <view class="test-form">
+      <view class="form-item">
+        <text class="form-label">测试昵称：</text>
+        <input class="form-input" placeholder="输入测试昵称" value="{{testNickname}}" bindinput="onTestNicknameInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">测试头像：</text>
+        <input class="form-input" placeholder="输入测试头像URL" value="{{testAvatarUrl}}" bindinput="onTestAvatarUrlInput" />
+      </view>
+      <button class="btn btn-secondary" bindtap="generateTestData">生成随机测试数据</button>
+    </view>
+  </view>
+
+  <view class="test-section">
+    <view class="section-title">测试操作</view>
+    <view class="test-buttons">
+      <button class="btn btn-primary" bindtap="testConnection" loading="{{testingConnection}}">
+        {{testingConnection ? '测试中...' : '测试连接'}}
+      </button>
+      <button class="btn btn-primary" bindtap="testQuery" loading="{{testingQuery}}">
+        {{testingQuery ? '查询中...' : '查询用户信息'}}
+      </button>
+      <button class="btn btn-success" bindtap="testUpdate" loading="{{testingUpdate}}">
+        {{testingUpdate ? '更新中...' : '更新用户信息'}}
+      </button>
+      <button class="btn btn-warning" bindtap="testVerify" loading="{{testingVerify}}">
+        {{testingVerify ? '验证中...' : '验证更新结果'}}
+      </button>
+      <button class="btn btn-danger" bindtap="restoreOriginal" loading="{{restoring}}">
+        {{restoring ? '恢复中...' : '恢复原始数据'}}
+      </button>
+    </view>
+  </view>
+
+  <view class="test-section">
+    <view class="section-title">测试日志</view>
+    <scroll-view class="log-container" scroll-y="true" scroll-top="{{logScrollTop}}">
+      <view class="log-item" wx:for="{{logs}}" wx:key="index">
+        <text class="log-time">{{item.time}}</text>
+        <text class="log-message {{item.type}}">{{item.message}}</text>
+      </view>
+    </scroll-view>
+    <button class="btn btn-secondary" bindtap="clearLogs">清空日志</button>
+  </view>
+
+  <view class="test-section">
+    <view class="section-title">完整测试流程</view>
+    <button class="btn btn-primary full-width" bindtap="runFullTest" loading="{{runningFullTest}}">
+      {{runningFullTest ? '测试中...' : '运行完整测试'}}
+    </button>
+  </view>
+</view>

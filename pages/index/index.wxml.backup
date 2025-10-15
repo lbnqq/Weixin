@@ -1,0 +1,130 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 头部欢迎信息 -->
+  <view class="header">
+    <view class="welcome-section">
+      <view class="welcome-icon">🧠</view>
+      <view class="welcome-content">
+        <text class="welcome-title">大五人格测试</text>
+        <text class="welcome-desc">深入了解自己的性格特征，发现更好的自己</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 测试卡片 -->
+  <view class="test-section">
+    <view class="test-card card">
+      <view class="test-header">
+        <view class="test-icon">🧠</view>
+        <view class="test-info">
+          <text class="test-title">大五人格测试</text>
+          <text class="test-description">通过50道专业题目，从5个维度全面了解你的性格特征</text>
+        </view>
+      </view>
+
+      <!-- 测试进度 -->
+      <view wx:if="{{testProgress}}" class="progress-section">
+        <view class="progress-info">
+          <text class="progress-text">上次测试进度：{{testProgress.current}}/50</text>
+          <text class="progress-date">保存于 {{testProgress.savedAt}}</text>
+        </view>
+      </view>
+
+      <view class="test-features">
+        <view class="feature-item">
+          <text class="feature-icon">✨</text>
+          <text class="feature-text">AI个性分析</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">📊</text>
+          <text class="feature-text">五维度评分</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">💼</text>
+          <text class="feature-text">职业建议</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🤝</text>
+          <text class="feature-text">人际关系指导</text>
+        </view>
+      </view>
+
+      <view class="test-actions">
+        <button class="btn-primary start-btn" bindtap="startTest">
+          {{testProgress ? '继续测试' : '开始测试'}}
+        </button>
+        <button wx:if="{{testProgress}}" class="btn-secondary restart-btn" bindtap="restartTest">
+          重新开始
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近测试记录 -->
+  <view wx:if="{{isLoggedIn && recentTests.length > 0}}" class="recent-section">
+    <view class="section-header">
+      <text class="section-title">最近的测试记录</text>
+      <text class="section-subtitle" bindtap="viewHistory">查看全部 ></text>
+    </view>
+
+    <view class="recent-list">
+      <view wx:for="{{recentTests}}" wx:key="timestamp"
+            class="recent-item card" bindtap="viewResult" data-index="{{index}}">
+        <view class="recent-info">
+          <view class="recent-date">
+            {{item.testDate}}
+          </view>
+          <view class="recent-summary">
+            总分：{{item.totalAverage}} | 主要特征：{{item.personalityType}}
+          </view>
+        </view>
+        <view class="recent-arrow">></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能介绍 -->
+  <view class="features-section">
+    <view class="section-header">
+      <text class="section-title">测试功能</text>
+    </view>
+
+    <view class="features-grid">
+      <view class="feature-card">
+        <view class="feature-card-icon">🎨</view>
+        <text class="feature-card-title">开放性</text>
+        <text class="feature-card-desc">创造力与想象力</text>
+      </view>
+      <view class="feature-card">
+        <view class="feature-card-icon">📋</view>
+        <text class="feature-card-title">尽责性</text>
+        <text class="feature-card-desc">自律与组织能力</text>
+      </view>
+      <view class="feature-card">
+        <view class="feature-card-icon">🌟</view>
+        <text class="feature-card-title">外向性</text>
+        <text class="feature-card-desc">社交活跃程度</text>
+      </view>
+      <view class="feature-card">
+        <view class="feature-card-icon">🤝</view>
+        <text class="feature-card-title">宜人性</text>
+        <text class="feature-card-desc">合作与同理心</text>
+      </view>
+      <view class="feature-card">
+        <view class="feature-card-icon">😰</view>
+        <text class="feature-card-title">神经质</text>
+        <text class="feature-card-desc">情绪稳定性</text>
+      </view>
+      <view class="feature-card">
+        <view class="feature-card-icon">🤖</view>
+        <text class="feature-card-title">AI分析</text>
+        <text class="feature-card-desc">智能个性报告</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer">
+    <text class="footer-text">测试约需10-15分钟，建议在安静环境下完成</text>
+  </view>
+</view>

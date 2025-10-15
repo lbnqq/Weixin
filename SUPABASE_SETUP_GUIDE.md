@@ -53,6 +53,26 @@ production: {
 4. 粘贴到SQL编辑器中
 5. 点击 "Run" 执行SQL脚本
 
+### 如果遇到列缺失错误
+
+如果在测试过程中遇到类似 `Could not find the 'user_id' column of 'users' in the schema cache` 的错误，请参考 `DATABASE_FIX_GUIDE.md` 文件中的修复指南。
+
+快速修复方法：
+1. 执行 `fix-missing-columns.sql` 脚本
+2. 或者手动执行以下SQL语句：
+
+```sql
+-- 添加缺失的列
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_id VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatarUri TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickName VARCHAR(255);
+
+-- 清理缓存
+NOTIFY pgrst, 'reload schema';
+```
+
 ## 步骤5：配置微信小程序
 
 ### 5.1 获取微信小程序AppID
