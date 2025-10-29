@@ -1,4 +1,6 @@
 // pages/result/result.js
+const { TestService } = require('../../utils/test-service')
+
 Page({
   data: {
     userInfo: null,
@@ -44,18 +46,26 @@ Page({
       if (result) {
         console.log('从历史记录加载的结果:', result)
 
+        // 检查scores格式并转换
+        let scores = result.scores
+        if (scores && typeof scores.openness === 'number') {
+          // 如果是云端保存的简单数字格式，转换为复杂对象格式
+          console.log('检测到云端数据格式，进行转换')
+          scores = this.convertSimpleScoresToObject(scores)
+        }
+
         // 如果历史记录中没有MBTI和贝尔宾结果，重新计算
         let mbtiResult = result.mbtiResult
         let belbinResult = result.belbinResult
 
         if (!mbtiResult) {
           const { calculateMBTI } = require('../../utils/mbti-calculator')
-          mbtiResult = calculateMBTI(result.scores)
+          mbtiResult = calculateMBTI(scores)
         }
 
         if (!belbinResult) {
           const { calculateBelbinRoles } = require('../../utils/belbin-calculator')
-          belbinResult = calculateBelbinRoles(result.scores)
+          belbinResult = calculateBelbinRoles(scores)
         }
 
         // 检查AI分析结果是否完整，如果不完整则生成完整的默认分析
@@ -63,14 +73,14 @@ Page({
         const enhancedSummary = {
           success: aiSummary.success || false,
           // 基础分析
-          career: aiSummary.career || this.getDefaultCareerAnalysis(result.scores),
-          personality: aiSummary.personality || this.getDefaultPersonalityAnalysis(result.scores),
-          relationship: aiSummary.relationship || this.getDefaultRelationshipAnalysis(result.scores),
+          career: aiSummary.career || this.getDefaultCareerAnalysis(scores),
+          personality: aiSummary.personality || this.getDefaultPersonalityAnalysis(scores),
+          relationship: aiSummary.relationship || this.getDefaultRelationshipAnalysis(scores),
           // MBTI和贝尔宾分析 - 如果没有则生成基于计算结果的默认分析
           mbtiAnalysis: aiSummary.mbtiAnalysis || this.generateMBTIAnalysis(mbtiResult),
           belbinAnalysis: aiSummary.belbinAnalysis || this.generateBelbinAnalysis(belbinResult),
-          careerDevelopment: aiSummary.careerDevelopment || this.generateCareerDevelopment(result.scores, mbtiResult, belbinResult),
-          personalGrowth: aiSummary.personalGrowth || this.generatePersonalGrowth(result.scores, mbtiResult, belbinResult)
+          careerDevelopment: aiSummary.careerDevelopment || this.generateCareerDevelopment(scores, mbtiResult, belbinResult),
+          personalGrowth: aiSummary.personalGrowth || this.generatePersonalGrowth(scores, mbtiResult, belbinResult)
         }
 
         console.log('增强后的AI总结:', enhancedSummary)
@@ -89,7 +99,7 @@ Page({
         console.log('格式化后的内容:', formattedData)
 
         this.setData({
-          scores: result.scores,
+          scores: scores,
           aiSummary: enhancedSummary,
           mbtiResult: mbtiResult,
           belbinResult: belbinResult,
@@ -110,6 +120,28 @@ Page({
         isLoading: false
       })
     }
+  },
+
+  // 将简单数字格式的scores转换为复杂对象格式
+  convertSimpleScoresToObject: function(simpleScores) {
+    const convertedScores = {}
+
+    Object.keys(simpleScores).forEach(dimension => {
+      const percentage = simpleScores[dimension] // 0-100的百分比
+      const average = (percentage / 100 * 5).toFixed(2) // 转换为1-5的平均分
+
+      convertedScores[dimension] = {
+        scores: [], // 原始答案数组，历史记录中无法恢复
+        total: percentage, // 使用百分比作为总分
+        average: parseFloat(average),
+        count: 10, // 假设每个维度10道题
+        maxPossible: 50, // 10题 * 5分
+        percentage: percentage.toFixed(1)
+      }
+    })
+
+    console.log('转换后的scores格式:', convertedScores)
+    return convertedScores
   },
 
   // 计算测试结果
@@ -254,6 +286,10 @@ Page({
       neuroticism: "情绪相对稳定，能够很好应对压力和挑战，内心平和，面对困难能保持冷静。"
     }
 
+    if (!highestTrait || !lowestTrait) {
+      return '无法确定你的主要性格特质，建议重新进行测试以获得更准确的分析。'
+    }
+
     return `你最突出的性格特质是<text class="content-emphasis">${highestTrait.name}</text>（得分${highestTrait.score}分）。
 
 ${analyses[highestTrait.dimension]}
@@ -273,6 +309,10 @@ ${analyses[highestTrait.dimension]}
       extraversion: "销售、公关、人力资源、培训师、活动策划",
       agreeableness: "心理咨询师、社工、教师、护士、客户服务",
       neuroticism: "研究、技术工作、写作、分析、咨询"
+    }
+
+    if (!highestTrait) {
+      return '无法确定你的主要性格特质，建议重新进行测试以获得更准确的分析。'
     }
 
     return `基于你的<text class="content-emphasis">${highestTrait.name}</text>特质，推荐职业：
@@ -296,6 +336,10 @@ ${analyses[highestTrait.dimension]}
       neuroticism: "情绪稳定，面对冲突能保持冷静，理性解决人际问题，成为他人支柱。"
     }
 
+    if (!highestTrait) {
+      return '无法确定你的主要性格特质，建议重新进行测试以获得更准确的人际关系分析。'
+    }
+
     return `你的<text class="content-emphasis">${highestTrait.name}</text>特质在人际关系中具有优势：
 
 ${relationships[highestTrait.dimension]}
@@ -308,9 +352,21 @@ ${relationships[highestTrait.dimension]}
     let highest = null
     let highestScore = 0
 
+    if (!scores || typeof scores !== 'object') {
+      console.error('无效的scores数据:', scores)
+      return null
+    }
+
     Object.keys(scores).forEach(dimension => {
-      if (scores[dimension].average > highestScore) {
-        highestScore = scores[dimension].average
+      const dimensionData = scores[dimension]
+      if (!dimensionData || typeof dimensionData !== 'object') {
+        console.warn(`维度 ${dimension} 数据格式无效:`, dimensionData)
+        return
+      }
+
+      const score = dimensionData.average || 0
+      if (score > highestScore) {
+        highestScore = score
         highest = {
           dimension: dimension,
           name: this.getTraitName(dimension),
@@ -327,9 +383,21 @@ ${relationships[highestTrait.dimension]}
     let lowest = null
     let lowestScore = 5
 
+    if (!scores || typeof scores !== 'object') {
+      console.error('无效的scores数据:', scores)
+      return null
+    }
+
     Object.keys(scores).forEach(dimension => {
-      if (scores[dimension].average < lowestScore) {
-        lowestScore = scores[dimension].average
+      const dimensionData = scores[dimension]
+      if (!dimensionData || typeof dimensionData !== 'object') {
+        console.warn(`维度 ${dimension} 数据格式无效:`, dimensionData)
+        return
+      }
+
+      const score = dimensionData.average || 0
+      if (score < lowestScore) {
+        lowestScore = score
         lowest = {
           dimension: dimension,
           name: this.getTraitName(dimension),
@@ -406,11 +474,16 @@ ${relationships[highestTrait.dimension]}
   },
 
   // 保存测试结果
-  saveTestResult: function (scores, aiSummary) {
+  async saveTestResult(scores, aiSummary) {
     try {
+      wx.showLoading({
+        title: '保存中...'
+      })
+
       const { saveTestResult, generateResultSummary } = require('../../utils/calculation')
 
-      const result = {
+      // 准备本地保存的数据
+      const localResult = {
         scores: scores,
         aiSummary: aiSummary,
         mbtiResult: this.data.mbtiResult,
@@ -421,14 +494,65 @@ ${relationships[highestTrait.dimension]}
       }
 
       // 保存到本地存储
-      saveTestResult(result)
+      saveTestResult(localResult)
 
-      // 这里可以添加保存到Supabase的逻辑
-      this.saveToSupabase(result)
+      // 准备云开发保存的数据
+      const cloudData = {
+        testType: 'big_five',
+        scores: {
+          openness: scores.openness.percentage ? parseFloat(scores.openness.percentage) : 0,
+          conscientiousness: scores.conscientiousness.percentage ? parseFloat(scores.conscientiousness.percentage) : 0,
+          extraversion: scores.extraversion.percentage ? parseFloat(scores.extraversion.percentage) : 0,
+          agreeableness: scores.agreeableness.percentage ? parseFloat(scores.agreeableness.percentage) : 0,
+          neuroticism: scores.neuroticism.percentage ? parseFloat(scores.neuroticism.percentage) : 0
+        },
+        duration: this.calculateTestDuration() // 计算测试用时
+      }
+
+      // 保存到云数据库
+      const testService = new TestService()
+      const cloudResult = await testService.saveTestResult(cloudData)
+
+      wx.hideLoading()
+
+      if (cloudResult.success) {
+        console.log('测试结果已保存到云端:', cloudResult.data)
+        wx.showToast({
+          title: '保存成功',
+          icon: 'success',
+          duration: 1500
+        })
+      } else {
+        console.warn('云端保存失败，但本地已保存:', cloudResult.error)
+        wx.showToast({
+          title: '本地已保存',
+          icon: 'success',
+          duration: 1500
+        })
+      }
 
     } catch (error) {
+      wx.hideLoading()
       console.error('保存测试结果失败:', error)
+      wx.showToast({
+        title: '保存失败',
+        icon: 'error',
+        duration: 2000
+      })
     }
+  },
+
+  // 计算测试用时（需要从test页面传递开始时间）
+  calculateTestDuration: function() {
+    // 这里可以根据实际情况计算测试用时
+    // 可以从全局状态或本地存储中获取测试开始时间
+    const testStartTime = wx.getStorageSync('testStartTime')
+    if (testStartTime) {
+      const duration = Math.floor((Date.now() - testStartTime) / 1000)
+      wx.removeStorageSync('testStartTime') // 清除开始时间
+      return duration
+    }
+    return 1200 // 默认20分钟
   },
 
   // 切换分析标签页
@@ -478,28 +602,16 @@ ${relationships[highestTrait.dimension]}
     }
   },
 
-  // 保存到Supabase
-  async saveToSupabase(result) {
-    // 暂时跳过Supabase保存，等待域名配置
+  // 保存测试结果（本地存储）
+  async saveResult(result) {
     try {
-      const { supabase } = require('../../utils/supabase')
       const userInfo = wx.getStorageSync('userInfo')
-
       if (userInfo) {
-        // 在开发环境中暂时不调用Supabase
-        console.log('开发环境：跳过Supabase保存')
-        return
-
-        // 等域名配置完成后，取消下面这行注释
-        // await supabase.insert('test_records', {
-        //   user_openid: userInfo.openid || 'anonymous',
-        //   scores: result.scores,
-        //   ai_summary: result.aiSummary,
-        //   test_date: new Date().toISOString()
-        // })
+        // 结果已经在本地存储中保存，这里可以添加其他逻辑
+        console.log('测试结果已保存到本地')
       }
     } catch (error) {
-      console.error('保存到Supabase失败:', error)
+      console.error('保存结果失败:', error)
     }
   },
 

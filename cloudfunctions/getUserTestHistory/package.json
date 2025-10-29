@@ -1,0 +1,12 @@
+{
+  "name": "getUserTestHistory",
+  "version": "1.0.0",
+  "description": "获取用户测试历史云函数",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

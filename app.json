@@ -7,14 +7,7 @@
     "pages/profile/profile",
     "pages/edit-profile/edit-profile",
     "pages/agreement/agreement",
-    "pages/privacy/privacy",
-    "pages/test-connection/test-connection",
-    "pages/dynamic-crud-test/dynamic-crud-test",
-    "test-supabase",
-    "test-supabase-storage",
-    "pages/test-supabase/test-supabase",
-    "pages/debug-database/debug-database",
-    "pages/test-crud/test-crud"
+    "pages/privacy/privacy"
   ],
   "window": {
     "backgroundTextStyle": "light",

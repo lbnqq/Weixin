@@ -68,17 +68,46 @@
     </view>
 
     <view class="recent-list">
-      <view wx:for="{{recentTests}}" wx:key="timestamp"
+      <view wx:for="{{recentTests}}" wx:key="testId"
             class="recent-item card" bindtap="viewResult" data-index="{{index}}">
-        <view class="recent-info">
-          <view class="recent-date">
-            {{item.testDate}}
-          </view>
-          <view class="recent-summary">
-            总分：{{item.totalAverage}} | 主要特征：{{item.personalityType}}
+        <view class="recent-header">
+          <text class="recent-date">{{item.formattedDate}}</text>
+          <text class="recent-score">{{item.totalScore}}分</text>
+        </view>
+
+        <view class="recent-summary">
+          <text class="summary-text">{{item.summary}}</text>
+        </view>
+
+        <view class="recent-scores">
+          <view class="mini-score-list">
+            <view class="mini-score-item">
+              <text class="mini-label">开放</text>
+              <text class="mini-value">{{item.formattedScores.openness}}</text>
+            </view>
+            <view class="mini-score-item">
+              <text class="mini-label">尽责</text>
+              <text class="mini-value">{{item.formattedScores.conscientiousness}}</text>
+            </view>
+            <view class="mini-score-item">
+              <text class="mini-label">外向</text>
+              <text class="mini-value">{{item.formattedScores.extraversion}}</text>
+            </view>
+            <view class="mini-score-item">
+              <text class="mini-label">宜人</text>
+              <text class="mini-value">{{item.formattedScores.agreeableness}}</text>
+            </view>
+            <view class="mini-score-item">
+              <text class="mini-label">神经</text>
+              <text class="mini-value">{{item.formattedScores.neuroticism}}</text>
+            </view>
           </view>
         </view>
-        <view class="recent-arrow">></view>
+
+        <view class="recent-meta">
+          <text class="recent-duration">{{item.duration}}秒</text>
+          <text class="recent-arrow">></text>
+        </view>
       </view>
     </view>
   </view>

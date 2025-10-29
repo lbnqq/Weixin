@@ -3,11 +3,14 @@
   <!-- 头部 -->
   <view class="header-section">
     <text class="page-title">测试历史</text>
-    <text class="page-subtitle">最多保存5条测试记录</text>
+    <text class="page-subtitle">共{{totalCount}}条记录</text>
+    <button class="refresh-btn" bindtap="refreshHistory" disabled="{{isLoading}}">
+      <text class="refresh-icon">{{isLoading ? '⟳' : '🔄'}}</text>
+    </button>
   </view>
 
   <!-- 加载状态 -->
-  <view wx:if="{{isLoading}}" class="loading-section">
+  <view wx:if="{{isLoading && testHistory.length === 0}}" class="loading-section">
     <text class="loading-text">加载中...</text>
   </view>
 
@@ -20,75 +23,79 @@
   </view>
 
   <!-- 历史记录列表 -->
-  <view wx:if="{{!isLoading && !isEmpty}}" class="history-section">
-    <!-- 清空按钮 -->
-    <view class="section-actions">
-      <button class="clear-btn" bindtap="clearAllHistory">清空历史</button>
-    </view>
-
+  <view wx:if="{{!isEmpty}}" class="history-section">
     <!-- 记录列表 -->
     <view class="history-list">
-      <view wx:for="{{testHistory}}" wx:key="timestamp"
+      <view wx:for="{{testHistory}}" wx:key="testId"
             class="history-item">
         <view class="item-content" bindtap="viewResult" data-index="{{index}}">
           <view class="item-header">
-            <text class="item-date">{{item.testDate}}</text>
-            <text class="item-type">{{item.personalityType}}</text>
-          </view>
-
-          <view class="item-scores">
-            <view class="score-bar-item">
-              <text class="score-label">开放性</text>
-              <view class="mini-score-bar">
-                <view class="mini-score-fill" style="width: {{item.scores.openness.average / 5 * 100}}%"></view>
-              </view>
-              <text class="score-value">{{item.scores.openness.average}}</text>
-            </view>
-
-            <view class="score-bar-item">
-              <text class="score-label">尽责性</text>
-              <view class="mini-score-bar">
-                <view class="mini-score-fill" style="width: {{item.scores.conscientiousness.average / 5 * 100}}%"></view>
-              </view>
-              <text class="score-value">{{item.scores.conscientiousness.average}}</text>
-            </view>
-
-            <view class="score-bar-item">
-              <text class="score-label">外向性</text>
-              <view class="mini-score-bar">
-                <view class="mini-score-fill" style="width: {{item.scores.extraversion.average / 5 * 100}}%"></view>
-              </view>
-              <text class="score-value">{{item.scores.extraversion.average}}</text>
-            </view>
-
-            <view class="score-bar-item">
-              <text class="score-label">宜人性</text>
-              <view class="mini-score-bar">
-                <view class="mini-score-fill" style="width: {{item.scores.agreeableness.average / 5 * 100}}%"></view>
-              </view>
-              <text class="score-value">{{item.scores.agreeableness.average}}</text>
-            </view>
-
-            <view class="score-bar-item">
-              <text class="score-label">神经质</text>
-              <view class="mini-score-bar">
-                <view class="mini-score-fill" style="width: {{item.scores.neuroticism.average / 5 * 100}}%"></view>
-              </view>
-              <text class="score-value">{{item.scores.neuroticism.average}}</text>
+            <text class="item-date">{{item.formattedDate}}</text>
+            <view class="item-meta">
+              <text class="item-duration">{{item.duration}}秒</text>
+              <text class="item-score">{{item.totalScore}}分</text>
             </view>
           </view>
 
           <view class="item-summary">
-            <text class="summary-text">总分：{{item.totalAverage}} | 最高：{{item.highest.name}} ({{item.highest.score}})</text>
+            <text class="summary-text">{{item.summary}}</text>
+          </view>
+
+          <view class="item-scores">
+            <view class="score-row">
+              <view class="score-item">
+                <text class="score-label">开放性</text>
+                <view class="mini-score-bar">
+                  <view class="mini-score-fill" style="width: {{item.formattedScores.openness}}%"></view>
+                </view>
+                <text class="score-value">{{item.formattedScores.openness}}</text>
+              </view>
+              <view class="score-item">
+                <text class="score-label">尽责性</text>
+                <view class="mini-score-bar">
+                  <view class="mini-score-fill" style="width: {{item.formattedScores.conscientiousness}}%"></view>
+                </view>
+                <text class="score-value">{{item.formattedScores.conscientiousness}}</text>
+              </view>
+            </view>
+            <view class="score-row">
+              <view class="score-item">
+                <text class="score-label">外向性</text>
+                <view class="mini-score-bar">
+                  <view class="mini-score-fill" style="width: {{item.formattedScores.extraversion}}%"></view>
+                </view>
+                <text class="score-value">{{item.formattedScores.extraversion}}</text>
+              </view>
+              <view class="score-item">
+                <text class="score-label">宜人性</text>
+                <view class="mini-score-bar">
+                  <view class="mini-score-fill" style="width: {{item.formattedScores.agreeableness}}%"></view>
+                </view>
+                <text class="score-value">{{item.formattedScores.agreeableness}}</text>
+              </view>
+            </view>
+            <view class="score-row">
+              <view class="score-item">
+                <text class="score-label">神经质</text>
+                <view class="mini-score-bar">
+                  <view class="mini-score-fill" style="width: {{item.formattedScores.neuroticism}}%"></view>
+                </view>
+                <text class="score-value">{{item.formattedScores.neuroticism}}</text>
+              </view>
+            </view>
           </view>
         </view>
-
-        <view class="item-actions">
-          <button class="delete-btn" bindtap="deleteRecord" data-index="{{index}}">
-            <text class="delete-icon">🗑️</text>
-          </button>
-        </view>
       </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore && !isLoading}}" class="load-more-section">
+      <button class="load-more-btn" bindtap="loadMore">加载更多</button>
+    </view>
+
+    <!-- 加载中状态 -->
+    <view wx:if="{{isLoading && testHistory.length > 0}}" class="loading-more-section">
+      <text class="loading-more-text">加载中...</text>
     </view>
 
     <!-- 底部操作 -->
@@ -96,6 +103,10 @@
       <button class="action-btn" bindtap="startNewTest">
         <text class="btn-icon">🧠</text>
         <text class="btn-text">重新测试</text>
+      </button>
+      <button class="action-btn secondary" bindtap="shareHistory" wx:if="{{testHistory.length > 0}}">
+        <text class="btn-icon">📤</text>
+        <text class="btn-text">分享记录</text>
       </button>
     </view>
   </view>

@@ -14,13 +14,6 @@ module.exports = {
     model: 'glm-4.5',
     maxTokens: 4096,
     temperature: 0.6
-  },
-
-  // Supabase配置
-  supabase: {
-    // 请在Supabase官网获取：https://supabase.com/
-    url: 'your-supabase-url-here',
-    key: 'your-supabase-anon-key-here'
   }
 }
 

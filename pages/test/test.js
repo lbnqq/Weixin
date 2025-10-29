@@ -13,6 +13,12 @@ Page({
   onLoad: function (options) {
     console.log('测试页面加载，参数:', options)
 
+    // 记录测试开始时间（如果是新测试）
+    if (!options.currentQuestion || parseInt(options.currentQuestion) === 1) {
+      wx.setStorageSync('testStartTime', Date.now())
+      console.log('记录测试开始时间')
+    }
+
     // 初始化调试信息
     this.setData({
       debugInfo: '页面开始加载...'

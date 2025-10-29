@@ -1,5 +1,6 @@
 // pages/profile/profile.js
 const app = getApp()
+const { CloudAuth } = require('../../utils/cloud-auth')
 
 Page({
   data: {
@@ -186,105 +187,47 @@ Page({
     })
   },
 
-  // 获取用户信息
-  getUserProfile: function () {
-    // 先调用 wx.login 获取 code
-    wx.login({
-      success: (loginRes) => {
-        if (loginRes.code) {
-          // 使用新的获取用户信息方式
-          wx.getUserInfo({
-            success: (infoRes) => {
-              const userInfo = infoRes.userInfo
-              this.setData({
-                userInfo: userInfo,
-                isLoggedIn: true
-              })
+  // 获取用户信息并登录
+  async getUserProfile() {
+    try {
+      wx.showLoading({
+        title: '登录中...'
+      })
 
-              // 保存用户信息和登录凭证
-              wx.setStorageSync('userInfo', userInfo)
-              wx.setStorageSync('loginCode', loginRes.code)
+      const cloudAuth = new CloudAuth()
+      const loginResult = await cloudAuth.login()
 
-              // 更新全局状态
-              app.globalData.userInfo = userInfo
-              app.globalData.isLoggedIn = true
+      wx.hideLoading()
 
-              console.log(`用户 ${userInfo.nickName} 已登录`)
-
-              // 保存用户信息到Supabase数据库
-              this.saveUserInfoToSupabase(userInfo, loginRes.code)
-
-              // 加载用户统计数据
-              this.loadUserStats()
-
-              wx.showToast({
-                title: '登录成功',
-                icon: 'success'
-              })
-            },
-            fail: (err) => {
-              console.error('获取用户信息失败:', err)
-              // 如果 getUserInfo 失败，尝试使用默认用户信息
-              this.handleLoginWithDefaultInfo(loginRes.code)
-            }
-          })
-        } else {
-          console.error('wx.login 失败:', loginRes.errMsg)
-          wx.showToast({
-            title: '登录失败',
-            icon: 'error'
-          })
-        }
-      },
-      fail: (err) => {
-        console.error('wx.login 失败:', err)
-        wx.showToast({
-          title: '登录失败',
-          icon: 'error'
+      if (loginResult.success) {
+        this.setData({
+          userInfo: loginResult.data,
+          isLoggedIn: true
         })
+
+        console.log(`用户 ${loginResult.data.nickName} 已登录`)
+
+        // 加载用户统计数据
+        this.loadUserStats()
+
+        wx.showToast({
+          title: loginResult.isNewUser ? '注册成功' : '登录成功',
+          icon: 'success'
+        })
+      } else {
+        throw new Error(loginResult.error)
       }
-    })
-  },
-
-  // 使用默认信息处理登录
-  handleLoginWithDefaultInfo: function(code) {
-    const defaultUserInfo = {
-      nickName: '微信用户',
-      avatarUrl: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
-      gender: 0,
-      city: '',
-      province: '',
-      country: '',
-      language: 'zh_CN'
+    } catch (error) {
+      wx.hideLoading()
+      console.error('登录失败:', error)
+      wx.showToast({
+        title: error.message || '登录失败',
+        icon: 'error'
+      })
     }
-
-    this.setData({
-      userInfo: defaultUserInfo,
-      isLoggedIn: true
-    })
-
-    // 保存用户信息和登录凭证
-    wx.setStorageSync('userInfo', defaultUserInfo)
-    wx.setStorageSync('loginCode', code)
-
-    // 更新全局状态
-    app.globalData.userInfo = defaultUserInfo
-    app.globalData.isLoggedIn = true
-
-    console.log('使用默认信息登录成功')
-
-    // 保存用户信息到Supabase数据库
-    this.saveUserInfoToSupabase(defaultUserInfo, code)
-
-    // 加载用户统计数据
-    this.loadUserStats()
-
-    wx.showToast({
-      title: '登录成功',
-      icon: 'success'
-    })
   },
 
+  
   // 退出登录
   handleLogout: function () {
     wx.showModal({
@@ -295,19 +238,19 @@ Page({
       success: (res) => {
         if (res.confirm) {
           try {
+            // 使用云开发认证登出
+            const cloudAuth = new CloudAuth()
+            cloudAuth.logout()
+
             // 获取当前用户信息用于清理数据
             const userInfo = wx.getStorageSync('userInfo')
 
             // 清除用户测试记录数据
             if (userInfo) {
-              const userHistoryKey = `testResults_${userInfo.userId || userInfo.openid || 'anonymous'}`
+              const userHistoryKey = `testHistory_${userInfo._openid || 'anonymous'}`
               wx.removeStorageSync(userHistoryKey)
               console.log(`已清除用户 ${userInfo.nickName} 的测试记录数据`)
             }
-
-            // 清除用户登录信息
-            wx.removeStorageSync('userInfo')
-            wx.removeStorageSync('loginCode')
 
             // 清除测试进度数据
             wx.removeStorageSync('testProgress')
@@ -487,187 +430,7 @@ Page({
     }
   },
 
-  // 保存用户信息到Supabase数据库
-  saveUserInfoToSupabase: function(userInfo, loginCode) {
-    const { supabase } = require('../../utils/supabase.js')
-    const config = require('../../utils/config.js')
-    
-    // 检查本地是否已有用户ID和OpenID
-    const localUserInfo = wx.getStorageSync('userInfo') || {}
-    let userId = localUserInfo.userId
-    let openid = localUserInfo.openid
-    
-    // 如果没有本地OpenID，生成一个固定的模拟OpenID（基于用户信息）
-    if (!openid) {
-      // 使用用户信息的哈希值作为固定的OpenID，确保同一用户每次登录使用相同的OpenID
-      const userInfoStr = JSON.stringify(userInfo)
-      openid = 'mock_openid_' + this.hashCode(userInfoStr)
-    }
-    
-    // 准备用户数据
-    const userData = {
-      openid: openid,
-      nickname: userInfo.nickName,
-      avatar_url: userInfo.avatarUrl,
-      gender: userInfo.gender || 0,
-      country: userInfo.country || '',
-      province: userInfo.province || '',
-      city: userInfo.city || '',
-      language: userInfo.language || 'zh_CN',
-      last_login_at: new Date().toISOString()
-    }
-    
-    console.log('准备保存用户信息到Supabase:', userData)
-    console.log('本地用户ID:', userId)
-    
-    // 设置请求头，添加用户上下文信息
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${supabase.key}`,
-      'apikey': supabase.key,
-      'Prefer': 'return=representation'
-    }
-    
-    // 如果已有用户ID，直接更新
-    if (userId) {
-      console.log('使用已有用户ID更新信息:', userId)
-      headers['x-user-id'] = userId.toString()
-      headers['x-user-openid'] = openid || ''
-      
-      // 直接使用wx.request进行更新，绕过RLS限制
-      wx.request({
-        url: `${supabase.url}/rest/v1/users?id=eq.${userId}`,
-        method: 'PATCH',
-        header: headers,
-        data: {
-          nickname: userData.nickname,
-          avatar_url: userData.avatar_url,
-          gender: userData.gender,
-          country: userData.country,
-          province: userData.province,
-          city: userData.city,
-          language: userData.language,
-          last_login_at: userData.last_login_at,
-          updated_at: new Date().toISOString()
-        },
-        success: (res) => {
-          console.log('更新用户信息响应:', res)
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            console.log('用户信息更新成功:', res.data)
-            
-            // 更新本地存储中的OpenID
-            const updatedUserInfo = wx.getStorageSync('userInfo') || {}
-            updatedUserInfo.openid = openid
-            wx.setStorageSync('userInfo', updatedUserInfo)
-          } else {
-            console.error('更新用户信息失败:', res)
-            console.error('状态码:', res.statusCode)
-            console.error('响应数据:', res.data)
-          }
-        },
-        fail: (err) => {
-          console.error('更新用户信息网络错误:', err)
-        }
-      })
-    } else {
-      // 没有用户ID，先查询是否已存在该OpenID的用户
-      console.log('查询用户是否已存在:', openid)
-      
-      // 直接使用wx.request查询用户
-      wx.request({
-        url: `${supabase.url}/rest/v1/users?openid=eq.${openid}&limit=1`,
-        method: 'GET',
-        header: headers,
-        success: (res) => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            const existingUsers = res.data
-            console.log('查询结果:', existingUsers)
-            
-            if (existingUsers && existingUsers.length > 0) {
-              // 用户已存在，更新信息
-              console.log('用户已存在，更新信息:', existingUsers[0].id)
-              
-              headers['x-user-id'] = existingUsers[0].id.toString()
-              headers['x-user-openid'] = openid
-              
-              wx.request({
-                url: `${supabase.url}/rest/v1/users?id=eq.${existingUsers[0].id}`,
-                method: 'PATCH',
-                header: headers,
-                data: {
-                  nickname: userData.nickname,
-                  avatar_url: userData.avatar_url,
-                  gender: userData.gender,
-                  country: userData.country,
-                  province: userData.province,
-                  city: userData.city,
-                  language: userData.language,
-                  last_login_at: userData.last_login_at,
-                  updated_at: new Date().toISOString()
-                },
-                success: (updateRes) => {
-                  console.log('更新用户信息响应:', updateRes)
-                  if (updateRes.statusCode >= 200 && updateRes.statusCode < 300) {
-                    console.log('用户信息更新成功:', updateRes.data)
-                    
-                    // 保存用户ID到本地存储，用于后续数据关联
-                    const updatedUserInfo = wx.getStorageSync('userInfo') || {}
-                    updatedUserInfo.userId = existingUsers[0].id
-                    updatedUserInfo.openid = openid
-                    wx.setStorageSync('userInfo', updatedUserInfo)
-                  } else {
-                    console.error('更新用户信息失败:', updateRes)
-                    console.error('状态码:', updateRes.statusCode)
-                    console.error('响应数据:', updateRes.data)
-                  }
-                },
-                fail: (err) => {
-                  console.error('更新用户信息网络错误:', err)
-                }
-              })
-            } else {
-              // 新用户，创建记录
-              console.log('新用户，创建记录')
-              
-              wx.request({
-                url: `${supabase.url}/rest/v1/users`,
-                method: 'POST',
-                header: headers,
-                data: userData,
-                success: (createRes) => {
-                  console.log('创建用户响应:', createRes)
-                  if (createRes.statusCode >= 200 && createRes.statusCode < 300) {
-                    console.log('用户创建成功:', createRes.data)
-                    
-                    // 保存用户ID和OpenID到本地存储，用于后续数据关联
-                    const updatedUserInfo = wx.getStorageSync('userInfo') || {}
-                    updatedUserInfo.userId = createRes.data[0].id
-                    updatedUserInfo.openid = openid
-                    wx.setStorageSync('userInfo', updatedUserInfo)
-                  } else {
-                    console.error('创建用户失败:', createRes)
-                    console.error('状态码:', createRes.statusCode)
-                    console.error('响应数据:', createRes.data)
-                  }
-                },
-                fail: (err) => {
-                  console.error('创建用户网络错误:', err)
-                }
-              })
-            }
-          } else {
-            console.error('查询用户失败:', res)
-            console.error('状态码:', res.statusCode)
-            console.error('响应数据:', res.data)
-          }
-        },
-        fail: (err) => {
-          console.error('查询用户网络错误:', err)
-        }
-      })
-    }
-  },
-
+  
   // 简单的字符串哈希函数
   hashCode: function(str) {
     let hash = 0

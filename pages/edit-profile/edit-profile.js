@@ -1,4 +1,6 @@
 // pages/edit-profile/edit-profile.js
+const { UserUpdate } = require('../../utils/user-update')
+
 Page({
   data: {
     userInfo: null,
@@ -194,7 +196,7 @@ Page({
   },
 
   // 保存个人资料
-  saveProfile: function () {
+  async saveProfile() {
     if (!this.data.hasChanges || this.data.isSaving) {
       return
     }
@@ -214,7 +216,7 @@ Page({
     const nicknameRegex = /^[\u4e00-\u9fa5a-zA-Z0-9_]+$/
     if (!nicknameRegex.test(nickname)) {
       wx.showToast({
-        title: '昵称包含不支持的字-符',
+        title: '昵称包含不支持的字符',
         icon: 'error',
         duration: 2000
       })
@@ -225,83 +227,68 @@ Page({
       isSaving: true
     })
 
-    // 先保存到本地存储
     try {
-      // 更新用户信息
+      const userUpdate = new UserUpdate()
       const updatedUserInfo = {
         ...this.data.userInfo,
         nickName: nickname,
         avatarUrl: this.data.tempAvatarUrl || this.data.userInfo.avatarUrl
       }
 
-      // 保存到本地存储
-      wx.setStorageSync('userInfo', updatedUserInfo)
+      // 检查是否需要更新头像
+      if (this.data.tempAvatarUrl && this.data.tempAvatarUrl !== this.data.userInfo.avatarUrl) {
+        // 上传新头像
+        const avatarResult = await userUpdate.updateAvatar(this.data.tempAvatarUrl)
+        if (avatarResult.success) {
+          console.log('头像更新成功:', avatarResult.data)
+        } else {
+          throw new Error(avatarResult.error)
+        }
+      }
 
-      // 更新全局数据
-      const app = getApp()
-      app.globalData.userInfo = updatedUserInfo
+      // 检查是否需要更新昵称
+      if (nickname !== this.data.userInfo.nickName) {
+        // 更新昵称
+        const nickNameResult = await userUpdate.updateNickName(nickname)
+        if (nickNameResult.success) {
+          console.log('昵称更新成功:', nickNameResult.data)
+        } else {
+          throw new Error(nickNameResult.error)
+        }
+      }
 
-      // 同步更新到Supabase数据库
-      this.updateUserInfoToSupabase(updatedUserInfo).then(() => {
-        // 更新页面数据
-        this.setData({
-          userInfo: updatedUserInfo,
-          originalAvatarUrl: updatedUserInfo.avatarUrl,
-          originalNickname: updatedUserInfo.nickName,
-          isSaving: false,
-          hasChanges: false,
-          showSaveSuccess: true
-        })
-
-        // 显示成功提示
-        setTimeout(() => {
-          this.setData({
-            showSaveSuccess: false
-          })
-        }, 2000)
-
-        wx.showToast({
-          title: '保存成功',
-          icon: 'success',
-          duration: 1500
-        })
-
-        // 通知其他页面更新
-        this.notifyProfileUpdate()
-      }).catch((error) => {
-        console.error('同步到Supabase失败:', error)
-        // 即使Supabase更新失败，本地已经保存成功，仍然显示成功
-        this.setData({
-          userInfo: updatedUserInfo,
-          originalAvatarUrl: updatedUserInfo.avatarUrl,
-          originalNickname: updatedUserInfo.nickName,
-          isSaving: false,
-          hasChanges: false,
-          showSaveSuccess: true
-        })
-
-        setTimeout(() => {
-          this.setData({
-            showSaveSuccess: false
-          })
-        }, 2000)
-
-        wx.showToast({
-          title: '本地保存成功',
-          icon: 'success',
-          duration: 1500
-        })
-
-        // 通知其他页面更新
-        this.notifyProfileUpdate()
+      // 更新页面数据
+      this.setData({
+        userInfo: wx.getStorageSync('userInfo'),
+        originalAvatarUrl: wx.getStorageSync('userInfo').avatarUrl,
+        originalNickname: wx.getStorageSync('userInfo').nickName,
+        isSaving: false,
+        hasChanges: false,
+        showSaveSuccess: true
       })
+
+      // 显示成功提示
+      setTimeout(() => {
+        this.setData({
+          showSaveSuccess: false
+        })
+      }, 2000)
+
+      wx.showToast({
+        title: '保存成功',
+        icon: 'success',
+        duration: 1500
+      })
+
+      // 通知其他页面更新
+      this.notifyProfileUpdate()
     } catch (error) {
       console.error('保存失败:', error)
       this.setData({
         isSaving: false
       })
       wx.showToast({
-        title: '保存失败',
+        title: error.message || '保存失败',
         icon: 'error',
         duration: 2000
       })
@@ -346,81 +333,6 @@ Page({
     }
   },
 
-  // 更新用户信息到Supabase数据库
-  updateUserInfoToSupabase: function(userInfo) {
-    return new Promise((resolve, reject) => {
-      const { supabase } = require('../../utils/supabase.js')
-      
-      // 获取用户ID和openid
-      const userId = userInfo.userId
-      const openid = userInfo.openid
-      
-      if (!userId && !openid) {
-        console.error('用户ID和openid都不存在，无法更新Supabase')
-        reject(new Error('用户ID和openid都不存在'))
-        return
-      }
-      
-      // 准备更新数据
-      const updateData = {
-        nickname: userInfo.nickName,
-        avatar_url: userInfo.avatarUrl,
-        updated_at: new Date().toISOString()
-      }
-      
-      console.log('准备更新Supabase用户信息:', { userId, openid }, updateData)
-      console.log('当前用户信息:', userInfo)
-      
-      // 设置请求头，添加用户上下文信息
-      const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.key}`,
-        'apikey': supabase.key,
-        'Prefer': 'return=representation'
-      }
-      
-      // 确定查询条件
-      let queryString = ''
-      if (userId) {
-        queryString = `?id=eq.${userId}`
-        headers['x-user-id'] = userId.toString()
-        headers['x-user-openid'] = openid || ''
-      } else {
-        queryString = `?openid=eq.${openid}`
-        headers['x-user-openid'] = openid
-      }
-      
-      // 直接使用wx.request进行更新，绕过RLS限制
-      const url = `${supabase.url}/rest/v1/users${queryString}`
-      
-      console.log('发送更新请求到:', url)
-      console.log('请求头:', headers)
-      console.log('请求数据:', updateData)
-      
-      wx.request({
-        url: url,
-        method: 'PATCH',
-        header: headers,
-        data: updateData,
-        success: (res) => {
-          console.log('更新请求响应:', res)
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            console.log('Supabase用户信息更新成功:', res.data)
-            resolve(res.data)
-          } else {
-            console.error('Supabase用户信息更新失败:', res)
-            console.error('状态码:', res.statusCode)
-            console.error('响应数据:', res.data)
-            reject(new Error(`HTTP ${res.statusCode}: ${JSON.stringify(res.data)}`))
-          }
-        },
-        fail: (err) => {
-          console.error('Supabase用户信息更新网络错误:', err)
-          reject(new Error(`网络请求失败: ${err.errMsg}`))
-        }
-      })
-    })
-  },
 
   // 通知其他页面用户信息已更新
   notifyProfileUpdate: function () {

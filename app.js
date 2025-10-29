@@ -1,9 +1,12 @@
 // app.js
 App({
   onLaunch: function () {
+    // 初始化云开发
+    this.initCloud()
+
     // 加载配置
     this.loadConfig()
-    
+
     // 初始化TDesign主题
     this.initTheme()
 
@@ -14,16 +17,25 @@ App({
     this.checkLoginStatus()
   },
 
+  // 初始化云开发
+  initCloud: function() {
+    if (!wx.cloud) {
+      console.error('请使用 2.2.3 或以上的基础库以使用云能力')
+    } else {
+      wx.cloud.init({
+        env: 'cloud1-7g80w0g6e3f866b7', // 请替换为你的云环境ID
+        traceUser: true
+      })
+      console.log('云开发初始化成功')
+    }
+  },
+
   // 加载配置
   loadConfig: function() {
     try {
       const config = require('./utils/config.js')
       this.globalData.config = config.config
-      
-      // 设置Supabase连接信息
-      this.globalData.supabaseUrl = config.config.supabaseUrl
-      this.globalData.supabaseKey = config.config.supabaseKey
-      
+
       console.log('配置加载成功')
     } catch (error) {
       console.error('配置加载失败:', error)
@@ -89,9 +101,6 @@ App({
     userInfo: null,
     isLoggedIn: false,
     theme: null,
-    supabaseUrl: '', // 从配置文件中获取
-    supabaseKey: '', // 从配置文件中获取
-    aiApiUrl: '', // 从配置文件中获取
     config: null // 配置对象
   }
 })
